@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guardrails, Observability &amp; MCP / A2A (Module 9) — K21 Academy Mock Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#F7F8FA; --surface:#FFFFFF; --border:#E8EAEE;
+    --text-1:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
+    --green:#8DC63F; --green-mid:#79B030; --green-bg:#F1F8E8; --green-dark:#4A7A1B;
+    --navy:#1A1248; --navy-mid:#2E2080; --blue:#1B9BD9;
+    --red:#E5484D; --red-bg:#FDECEC; --amber:#F5A623; --amber-bg:#FFF6E5;
+    --radius:16px; --radius-lg:24px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ---------- Top brand bar ---------- */
+  .topbar{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
+  .topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);}
+  .topbar .badge{background:rgba(141,198,63,.18);color:var(--green);border:1px solid rgba(141,198,63,.4);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+
+  /* ---------- Intro Screen ---------- */
+  #screen-intro .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .intro-hero{text-align:center;margin-bottom:32px;}
+  .intro-hero .eyebrow{display:inline-block;background:var(--green-bg);color:var(--green-dark);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px;}
+  .intro-hero h1{font-size:32px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .intro-hero p{color:var(--text-2);font-size:15px;max-width:640px;margin:0 auto;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0;}
+  .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 14px;text-align:center;}
+  .stat-card .label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:6px;}
+  .stat-card .value{font-size:20px;font-weight:800;color:var(--navy);}
+
+  .domain-table{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:28px;}
+  .domain-table h3{padding:18px 22px 0;font-size:16px;font-weight:800;color:var(--navy);}
+  .domain-table table{width:100%;border-collapse:collapse;margin-top:14px;}
+  .domain-table th{background:var(--green-bg);color:var(--green-dark);font-size:12px;text-transform:uppercase;letter-spacing:.03em;text-align:left;padding:10px 22px;}
+  .domain-table td{padding:12px 22px;font-size:14px;border-top:1px solid var(--border);color:var(--text-1);}
+  .domain-table td.weight{font-weight:700;color:var(--navy);text-align:right;}
+
+  .rules-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;}
+  .rules-card h3{color:var(--navy);font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .rules-card ul{list-style:none;}
+  .rules-card li{padding:9px 0 9px 26px;position:relative;font-size:14px;color:var(--text-2);border-top:1px solid var(--border);}
+  .rules-card li:first-child{border-top:none;}
+  .rules-card li::before{content:"⚠";position:absolute;left:0;color:var(--amber);font-size:13px;top:9px;}
+
+  .btn-primary{background:var(--green);color:#0f2a05;font-weight:700;font-size:16px;padding:16px 20px;border-radius:12px;width:100%;transition:.15s;box-shadow:0 4px 14px rgba(141,198,63,.35);}
+  .btn-primary:hover{background:var(--green-mid);transform:translateY(-1px);}
+  .btn-secondary{background:var(--surface);color:var(--navy);font-weight:700;font-size:14px;padding:12px 20px;border-radius:10px;border:1.5px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--navy);}
+  .btn-outline-red{background:#fff;color:var(--red);border:1.5px solid var(--red);font-weight:700;padding:10px 18px;border-radius:10px;}
+
+  /* ---------- Exam Screen ---------- */
+  #screen-exam .exam-header{background:var(--navy);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20;}
+  .exam-header .left{display:flex;align-items:center;gap:14px;font-size:13px;}
+  .exam-header .left .title{font-weight:700;font-size:14px;}
+  .exam-header .stats{display:flex;gap:18px;font-size:13px;color:#cfd0e6;}
+  .exam-header .stats b{color:#fff;}
+  .timer-pill{background:rgba(255,255,255,.1);padding:7px 16px;border-radius:999px;font-weight:800;font-size:15px;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+  .timer-pill.warn{background:rgba(245,166,35,.25);color:#ffd48a;}
+  .timer-pill.danger{background:rgba(229,72,77,.28);color:#ffb3b5;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+  .exam-layout{display:grid;grid-template-columns:1fr 300px;gap:0;max-width:1280px;margin:0 auto;align-items:start;}
+  .exam-main{padding:28px 32px 100px;}
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .q-count{font-size:13px;color:var(--text-3);font-weight:700;}
+  .domain-chip{background:var(--green-bg);color:var(--green-dark);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;}
+  .flag-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .flag-btn.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+
+  .question-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px 26px 8px;margin-bottom:20px;}
+  .question-text{font-size:17px;font-weight:600;color:var(--text-1);margin-bottom:20px;line-height:1.55;}
+
+  .option{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:.12s;}
+  .option:hover{border-color:var(--green);background:var(--green-bg);}
+  .option.selected{border-color:var(--green);background:var(--green-bg);}
+  .option .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-3);flex-shrink:0;margin-top:1px;position:relative;}
+  .option.selected .radio{border-color:var(--green-mid);}
+  .option.selected .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--green-mid);}
+  .option .opt-text{font-size:14.5px;color:var(--text-1);}
+  .option .opt-label{font-weight:800;color:var(--navy-mid);margin-right:6px;}
+
+  .nav-buttons{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .nav-buttons button{padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;}
+  .btn-prev{background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .btn-next{background:var(--navy);color:#fff;}
+  .btn-submit-inline{background:var(--green);color:#0f2a05;}
+
+  /* ---------- Sidebar navigator ---------- */
+  .sidebar{padding:28px 24px;position:sticky;top:64px;}
+  .sidebar-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;}
+  .sidebar-card h4{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);font-weight:800;margin-bottom:12px;}
+  .progress-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);padding:6px 0;}
+  .progress-row b{color:var(--navy);}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text-2);margin-top:10px;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .qnav-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .qnav-grid button{aspect-ratio:1;border-radius:8px;font-size:12.5px;font-weight:700;background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .qnav-grid button.answered{background:var(--green-bg);border-color:var(--green);color:var(--green-dark);}
+  .qnav-grid button.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+  .qnav-grid button.current{outline:2.5px solid var(--navy);outline-offset:1px;}
+  .submit-btn-side{width:100%;background:var(--navy);color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:14px;}
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:#fff;border-radius:var(--radius-lg);padding:30px;max-width:420px;width:100%;text-align:center;}
+  .modal-box .icon{font-size:38px;margin-bottom:10px;}
+  .modal-box h3{font-size:19px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .modal-box p{font-size:14px;color:var(--text-2);margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;font-size:14px;}
+
+  /* ---------- Results screen ---------- */
+  #screen-results .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .result-hero{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:36px;text-align:center;margin-bottom:24px;}
+  .score-ring{width:170px;height:170px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;position:relative;}
+  .score-ring .inner{width:136px;height:136px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-ring .inner .pct{font-size:34px;font-weight:800;color:var(--navy);}
+  .score-ring .inner .lbl{font-size:11px;color:var(--text-3);text-transform:uppercase;font-weight:700;}
+  .pass-pill{display:inline-block;padding:8px 20px;border-radius:999px;font-weight:800;font-size:14px;margin-bottom:6px;}
+  .pass-pill.pass{background:var(--green-bg);color:var(--green-dark);}
+  .pass-pill.fail{background:var(--red-bg);color:#a11d21;}
+  .result-sub{color:var(--text-2);font-size:14px;}
+
+  .domain-breakdown{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px;margin-bottom:24px;}
+  .domain-breakdown h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:18px;}
+  .db-row{margin-bottom:16px;}
+  .db-row .db-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;color:var(--text-1);font-weight:600;}
+  .db-bar-track{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
+  .db-bar-fill{height:100%;border-radius:999px;background:var(--green);}
+  .db-bar-fill.low{background:var(--red);}
+  .db-bar-fill.mid{background:var(--amber);}
+
+  .result-actions{display:flex;gap:14px;}
+  .result-actions button{flex:1;padding:15px;border-radius:12px;font-weight:700;font-size:14.5px;}
+
+  /* ---------- Review screen ---------- */
+  #screen-review .review-header{background:var(--navy);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;flex-wrap:wrap;gap:10px;}
+  .review-wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .filter-chip{background:#fff;border:1.5px solid var(--border);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .filter-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .review-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;}
+  .review-card .rtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .status-chip{font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;text-transform:uppercase;}
+  .status-chip.correct{background:var(--green-bg);color:var(--green-dark);}
+  .status-chip.incorrect{background:var(--red-bg);color:#a11d21;}
+  .status-chip.skipped{background:#F3F4F6;color:var(--text-2);}
+  .review-card .rq{font-weight:600;font-size:15px;margin-bottom:14px;}
+  .r-opt{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:13.5px;display:flex;gap:8px;align-items:flex-start;}
+  .r-opt.correctAns{border-color:var(--green);background:var(--green-bg);}
+  .r-opt.wrongPicked{border-color:var(--red);background:var(--red-bg);}
+  .r-explain{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-2);margin-top:10px;border-left:3px solid var(--blue);}
+  .r-explain b{color:var(--navy);}
+
+  @media (max-width:900px){
+    .exam-layout{grid-template-columns:1fr;}
+    .sidebar{position:static;order:-1;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO SCREEN ================= -->
+<section id="screen-intro" class="screen active">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Agentic AI Course · Module 9</div>
+  </div>
+  <div class="wrap">
+    <div class="intro-hero">
+      <span class="eyebrow">🧠 Mock Test Simulator</span>
+      <h1>Guardrails, Observability &amp; MCP / A2A</h1>
+      <p>Module 9 — Practice in a realistic exam environment with a timer, question navigator, flagging, and instant feedback after submission.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Questions</div><div class="value">20</div></div>
+      <div class="stat-card"><div class="label">Time Limit</div><div class="value">20 Min</div></div>
+      <div class="stat-card"><div class="label">Passing Score</div><div class="value">70%</div></div>
+      <div class="stat-card"><div class="label">Question Type</div><div class="value">Single Select</div></div>
+    </div>
+
+    <div class="rules-card">
+      <h3>⚠ Exam Rules — Read Before Starting</h3>
+      <ul>
+        <li>Do NOT switch tabs or minimize the browser — your exam will be paused and a warning issued.</li>
+        <li>3 tab-switch warnings will automatically end and submit your exam.</li>
+        <li>Each question has exactly one correct answer. Partial credit is not given.</li>
+        <li>You can flag questions for review and return to them any time before submitting.</li>
+        <li>Once submitted, answers cannot be changed.</li>
+      </ul>
+    </div>
+
+    <button class="btn-primary" onclick="startExam()">▶ Start Exam Now</button>
+  </div>
+</section>
+
+<!-- ================= EXAM SCREEN ================= -->
+<section id="screen-exam" class="screen">
+  <div class="exam-header">
+    <div class="left">
+      <span class="title">K21 · Guardrails, Observability &amp; MCP / A2A (M9)</span>
+    </div>
+    <div class="stats">
+      <span>Answered <b id="hdrAnswered">0/20</b></span>
+      <span>Flagged <b id="hdrFlagged">0</b></span>
+    </div>
+    <div class="timer-pill" id="timerPill">⏱ 20:00</div>
+  </div>
+
+  <div class="exam-layout">
+    <div class="exam-main">
+      <div class="q-meta">
+        <span class="q-count">Question <b id="qNum">1</b> of 20</span>
+        <span class="domain-chip" id="qDomain">—</span>
+        <button class="flag-btn" id="flagBtn" onclick="toggleFlag()">🚩 Flag for review</button>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text" id="qText">Loading...</div>
+        <div id="qOptions"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-prev" id="btnPrev" onclick="prevQuestion()">← Prev</button>
+        <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+        <button class="btn-submit-inline" id="btnSubmitInline" onclick="requestSubmit()">Submit Exam →</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <h4>Progress</h4>
+        <div class="progress-row"><span>Answered</span><b id="sideAnswered">0 / 20</b></div>
+        <div class="progress-row"><span>Unanswered</span><b id="sideUnanswered">20</b></div>
+        <div class="progress-row"><span>Flagged</span><b id="sideFlagged">0</b></div>
+      </div>
+      <div class="sidebar-card">
+        <h4>Question Navigator</h4>
+        <div class="qnav-grid" id="qnavGrid"></div>
+        <div class="legend">
+          <span><i style="background:var(--navy);"></i>Current</span>
+          <span><i style="background:var(--green-bg);border:1px solid var(--green);"></i>Answered</span>
+          <span><i style="background:var(--amber-bg);border:1px solid var(--amber);"></i>Flagged</span>
+          <span><i style="background:#fff;border:1px solid var(--border);"></i>Unanswered</span>
+        </div>
+      </div>
+      <button class="submit-btn-side" onclick="requestSubmit()">Submit Exam →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS SCREEN ================= -->
+<section id="screen-results" class="screen">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Results</div>
+  </div>
+  <div class="wrap">
+    <div class="result-hero">
+      <div class="score-ring" id="scoreRing">
+        <div class="inner">
+          <div class="pct" id="scorePct">0%</div>
+          <div class="lbl">Score</div>
+        </div>
+      </div>
+      <div class="pass-pill" id="passPill">—</div>
+      <div class="result-sub" id="resultSub">You scored 0 out of 20 questions correctly.</div>
+    </div>
+
+    <div class="domain-breakdown">
+      <h3>📊 Domain-wise Breakdown</h3>
+      <div id="domainBreakdownBody"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-secondary" style="flex:1;" onclick="retakeExam()">↺ Retake Exam</button>
+      <button class="btn-primary" style="flex:1;box-shadow:none;" onclick="openReview()">🔍 Review All Questions</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVIEW SCREEN ================= -->
+<section id="screen-review" class="screen">
+  <div class="review-header">
+    <div class="brand"><span class="dot"></span> Review Mode — Guardrails, Observability &amp; MCP / A2A M9</div>
+    <button class="btn-secondary" onclick="backToResults()">← Back to Results</button>
+  </div>
+  <div class="review-wrap">
+    <div class="filter-row">
+      <button class="filter-chip active" data-filter="all" onclick="setReviewFilter('all')">All (20)</button>
+      <button class="filter-chip" data-filter="correct" onclick="setReviewFilter('correct')">Correct</button>
+      <button class="filter-chip" data-filter="incorrect" onclick="setReviewFilter('incorrect')">Incorrect</button>
+      <button class="filter-chip" data-filter="skipped" onclick="setReviewFilter('skipped')">Skipped</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+</section>
+
+<!-- ================= MODALS ================= -->
+<div class="modal-overlay" id="tabWarnModal">
+  <div class="modal-box">
+    <div class="icon">🚨</div>
+    <h3>You Left the Exam!</h3>
+    <p id="tabWarnText">Switching tabs or minimizing the browser is not allowed during the exam.</p>
+    <div class="modal-actions">
+      <button class="btn-primary" style="box-shadow:none;" onclick="closeTabWarn()">Return to Exam</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="submitModal">
+  <div class="modal-box">
+    <div class="icon">📤</div>
+    <h3>Submit Exam?</h3>
+    <p id="submitModalText">You still have unanswered questions. Once submitted, you cannot change your answers.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSubmitModal()">Cancel</button>
+      <button class="btn-primary" style="box-shadow:none;background:var(--red);color:#fff;" onclick="finalSubmit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK — Guardrails, Observability & MCP / A2A (Module 9)
+   ========================================================= */
+const QUESTIONS = [
+{ id:"q001", domain:"MCP Fundamentals & Why It Matters", type:"single", correct_count:1,
+  question:"What core connectivity problem does the Model Context Protocol (MCP) primarily solve for AI application developers?",
+  options:[
+    {id:"a",text:"It reduces the need to write custom, one-off integration code for every combination of AI model and external tool/data source, replacing an M×N integration problem with a standardized M+N approach"},
+    {id:"b",text:"It eliminates the need for any AI model to ever call an external tool"},
+    {id:"c",text:"It replaces the need for a database entirely"},
+    {id:"d",text:"It guarantees that every LLM will produce identical outputs regardless of prompt"}
+  ], correct:["a"],
+  explanation:"MCP replaces the need for custom, one-off integrations between every AI application and every tool (an M×N problem) with a single standard protocol each side implements once, turning it into roughly an M+N problem." },
+
+{ id:"q002", domain:"MCP Fundamentals & Why It Matters", type:"single", correct_count:1,
+  question:"MCP is often described using the analogy 'USB for AI integrations.' What does this analogy primarily convey?",
+  options:[
+    {id:"a",text:"MCP requires a physical USB cable to connect models to tools"},
+    {id:"b",text:"MCP only works with USB-connected hardware devices"},
+    {id:"c",text:"Just as USB provides one standard physical/electrical interface that many different devices can plug into, MCP provides one standard protocol interface that many different AI applications and tools can plug into, instead of custom wiring for each pair"},
+    {id:"d",text:"MCP is a data storage format similar to a USB flash drive"}
+  ], correct:["c"],
+  explanation:"The USB analogy captures MCP's role as a single common interface: just as USB lets many devices plug into one standard port, MCP lets many AI applications and tools connect through one standard protocol instead of bespoke integrations." },
+
+{ id:"q003", domain:"MCP Fundamentals & Why It Matters", type:"single", correct_count:1,
+  question:"In MCP's architecture, what is the relationship between a 'host,' a 'client,' and a 'server'?",
+  options:[
+    {id:"a",text:"The server is the AI assistant application itself, and the host is a database"},
+    {id:"b",text:"The host application (such as an AI assistant) creates one or more MCP clients, each of which maintains a dedicated connection to a corresponding MCP server that exposes tools, resources, or prompts"},
+    {id:"c",text:"There is only ever a single combined host-client-server process with no separation of roles"},
+    {id:"d",text:"The client is responsible for exposing tools, while the server consumes them"}
+  ], correct:["b"],
+  explanation:"An MCP host (like an AI assistant application) instantiates one MCP client per connected server, and each client maintains its own dedicated connection to a server that exposes tools, resources, or prompts." },
+
+{ id:"q004", domain:"MCP Fundamentals & Why It Matters", type:"single", correct_count:1,
+  question:"What underlying message format does MCP use for communication between clients and servers?",
+  options:[
+    {id:"a",text:"A proprietary binary format unique to each vendor"},
+    {id:"b",text:"Plain, unstructured natural-language text with no defined schema"},
+    {id:"c",text:"XML-RPC exclusively, with no support for JSON"},
+    {id:"d",text:"JSON-RPC 2.0, used for request/response and notification messages between MCP clients and servers"}
+  ], correct:["d"],
+  explanation:"MCP is built on JSON-RPC 2.0, using standard request/response and notification message patterns for all communication between clients and servers." },
+
+{ id:"q005", domain:"MCP Fundamentals & Why It Matters", type:"single", correct_count:1,
+  question:"Without a standard like MCP, how many custom integrations would a system with M different AI applications and N different tools/data sources need to build, in the worst case, and how does MCP change that?",
+  options:[
+    {id:"a",text:"MCP has no effect on the number of integrations required"},
+    {id:"b",text:"MCP requires more integrations than building everything manually"},
+    {id:"c",text:"M×N custom integrations, one for every application-tool pair; MCP reduces this to roughly M+N by giving every application and every tool a single common protocol to implement against"},
+    {id:"d",text:"Exactly one integration regardless of whether MCP is used"}
+  ], correct:["c"],
+  explanation:"Without a shared standard, every application-tool pair needs its own integration (M×N in the worst case); MCP lets each side implement the protocol once, reducing the total integration burden to roughly M+N." },
+
+{ id:"q006", domain:"MCP Architecture & Primitives", type:"single", correct_count:1,
+  question:"Which three core primitives can an MCP server expose to a connected client?",
+  options:[
+    {id:"a",text:"Tools, Resources, and Prompts"},
+    {id:"b",text:"Only tools, with no other primitive types supported"},
+    {id:"c",text:"Databases, Firewalls, and Load Balancers"},
+    {id:"d",text:"Models, Weights, and Checkpoints"}
+  ], correct:["a"],
+  explanation:"MCP servers expose three core primitives: Tools (callable actions), Resources (readable data), and Prompts (reusable templates)." },
+
+{ id:"q007", domain:"MCP Architecture & Primitives", type:"single", correct_count:1,
+  question:"In MCP, a 'Tool' is best described as which of the following?",
+  options:[
+    {id:"a",text:"A read-only piece of reference documentation with no executable behavior"},
+    {id:"b",text:"A fixed image asset with no relation to model behavior"},
+    {id:"c",text:"A user-authentication credential stored on the server"},
+    {id:"d",text:"A callable function the model can invoke to take an action (such as a file search, database query, or API call), typically invoked at the model's own discretion"}
+  ], correct:["d"],
+  explanation:"A Tool in MCP is a callable function exposing an action the model can invoke — such as searching files, querying a database, or calling an API — generally at the model's own discretion." },
+
+{ id:"q008", domain:"MCP Architecture & Primitives", type:"single", correct_count:1,
+  question:"In MCP, a 'Resource' is best described as which of the following?",
+  options:[
+    {id:"a",text:"A callable function that always executes automatically with no host or user involvement"},
+    {id:"b",text:"A piece of read-only data (such as file contents or database records), identified by a URI, that the host or user typically decides whether and when to include in context"},
+    {id:"c",text:"A billing configuration for the MCP server"},
+    {id:"d",text:"A prompt template that only the model can select, never the user"}
+  ], correct:["b"],
+  explanation:"A Resource is read-only data identified by a URI (like file contents or database records); unlike Tools, it's typically the host or user, not the model, who decides whether and when to pull it into context." },
+
+{ id:"q009", domain:"MCP Architecture & Primitives", type:"single", correct_count:1,
+  question:"In MCP, a 'Prompt' is best described as which of the following?",
+  options:[
+    {id:"a",text:"A raw log file with no structure"},
+    {id:"b",text:"A binary file format for storing model weights"},
+    {id:"c",text:"A reusable, pre-defined prompt template exposed by the server that a user can select to trigger a structured interaction pattern, such as a templated workflow for a specific task"},
+    {id:"d",text:"A setting that permanently disables all tool calls"}
+  ], correct:["c"],
+  explanation:"A Prompt in MCP is a reusable, pre-defined template a server exposes, which a user can select to trigger a structured interaction pattern — such as a templated workflow for code review or a specific query type." },
+
+{ id:"q010", domain:"MCP Architecture & Primitives", type:"single", correct_count:1,
+  question:"MCP servers commonly support two standard transport mechanisms. Which pairing correctly describes them?",
+  options:[
+    {id:"a",text:"Bluetooth for local servers and satellite uplink for remote servers"},
+    {id:"b",text:"Only email-based messaging for all MCP communication"},
+    {id:"c",text:"A single transport that only works over dial-up modems"},
+    {id:"d",text:"stdio (standard input/output) for local, same-machine servers, and Streamable HTTP (HTTP with Server-Sent Events) for remote servers"}
+  ], correct:["d"],
+  explanation:"MCP defines two standard transports: stdio for locally-spawned servers running on the same machine, and Streamable HTTP (HTTP plus Server-Sent Events) for remote servers accessed over a network." },
+
+{ id:"q011", domain:"Agent Observability & Traceability", type:"single", correct_count:1,
+  question:"Why is debugging a non-deterministic AI agent typically more challenging than debugging traditional, deterministic software?",
+  options:[
+    {id:"a",text:"Because a non-deterministic agent may take different reasoning paths, tool calls, or outputs given the same input across separate runs, making failures harder to reliably reproduce and isolate compared to deterministic code paths"},
+    {id:"b",text:"Because traditional software never produces any bugs at all"},
+    {id:"c",text:"Because AI agents never call external tools, unlike traditional software"},
+    {id:"d",text:"Because deterministic software cannot be debugged using any tools"}
+  ], correct:["a"],
+  explanation:"Non-deterministic agents can behave differently across runs on the same input, which makes reproducing and isolating a specific failure harder than with traditional deterministic code, where the same input reliably triggers the same path." },
+
+{ id:"q012", domain:"Agent Observability & Traceability", type:"single", correct_count:1,
+  question:"What does 'traceability' mean in the context of observability for AI agents?",
+  options:[
+    {id:"a",text:"The ability to permanently delete all records of a request after it completes"},
+    {id:"b",text:"The ability to follow the full path of a request through a system — including LLM calls, tool invocations, and decisions — from start to finish, to understand exactly what happened and why"},
+    {id:"c",text:"A method for compressing model weights to reduce file size"},
+    {id:"d",text:"A billing feature unrelated to debugging or monitoring"}
+  ], correct:["b"],
+  explanation:"Traceability is the ability to follow a request's complete path through a system — including every LLM call, tool invocation, and decision — to understand exactly what happened at each step and why." },
+
+{ id:"q013", domain:"Agent Observability & Traceability", type:"single", correct_count:1,
+  question:"What kinds of information does a trace (or the spans within it) typically capture for an AI agent's execution?",
+  options:[
+    {id:"a",text:"Only the final output text, with no information about intermediate steps"},
+    {id:"b",text:"Exclusively the color scheme of the user interface"},
+    {id:"c",text:"Information about the physical data center's temperature"},
+    {id:"d",text:"The individual LLM calls, tool invocations, decisions, and their associated latencies and inputs/outputs along the execution path"}
+  ], correct:["d"],
+  explanation:"A trace's spans capture the individual steps of an agent's execution — LLM calls, tool invocations, decisions — along with their inputs, outputs, and latencies, giving a full picture of what happened along the way." },
+
+{ id:"q014", domain:"Agent Observability & Traceability", type:"single", correct_count:1,
+  question:"An observability dashboard tracks 'response times and error rates' in one category, 'LLM calls, tool usage, and decisions' in another, and 'query types, resolution rates, and costs' in a third. Which three metric categories does this represent, respectively?",
+  options:[
+    {id:"a",text:"Business metrics, Application metrics, and Agent metrics"},
+    {id:"b",text:"Application metrics, Agent metrics, and Business metrics"},
+    {id:"c",text:"Agent metrics, Business metrics, and Application metrics"},
+    {id:"d",text:"A single undifferentiated metric category repeated three times"}
+  ], correct:["b"],
+  explanation:"Response times and error rates are Application metrics, LLM calls/tool usage/decisions are Agent metrics, and query types/resolution rates/costs are Business metrics — three distinct layers of what to monitor." },
+
+{ id:"q015", domain:"Agent Observability & Traceability", type:"single", correct_count:1,
+  question:"What is the primary benefit of trace visualization tools that offer timeline or waterfall views of an agent's execution?",
+  options:[
+    {id:"a",text:"They permanently prevent any errors from ever occurring"},
+    {id:"b",text:"They automatically rewrite the agent's code to fix bugs"},
+    {id:"c",text:"They let developers visually see the sequence, duration, and nesting of steps (LLM calls, tool calls) in an agent's execution, making it easier to spot bottlenecks or failures at a glance"},
+    {id:"d",text:"They are used only for marketing dashboards with no debugging value"}
+  ], correct:["c"],
+  explanation:"Timeline or waterfall trace views let developers visually inspect the sequence, duration, and nesting of an agent's steps, making bottlenecks or failure points much easier to spot than scanning raw logs." },
+
+{ id:"q016", domain:"Guardrails & the A2A Protocol", type:"single", correct_count:1,
+  question:"In a layered guardrail architecture for a production AI agent, what does an 'input guardrail' typically check?",
+  options:[
+    {id:"a",text:"Incoming user input before it reaches the model — for example, screening for prompt injection attempts, disallowed content, or policy violations"},
+    {id:"b",text:"The physical temperature of the server rack"},
+    {id:"c",text:"Only the final response after the entire conversation has ended"},
+    {id:"d",text:"The agent's billing invoice at the end of the month"}
+  ], correct:["a"],
+  explanation:"An input guardrail screens incoming user input before it ever reaches the model, checking for things like prompt injection attempts, disallowed content, or other policy violations." },
+
+{ id:"q017", domain:"Guardrails & the A2A Protocol", type:"single", correct_count:1,
+  question:"In a layered guardrail architecture for a production AI agent, what does an 'output guardrail' typically check?",
+  options:[
+    {id:"a",text:"The agent's internal training data before the model is even deployed"},
+    {id:"b",text:"The model's generated response before it reaches the end user — for example, screening for disallowed content, PII leakage, or policy violations in the output"},
+    {id:"c",text:"The user's original input before any processing occurs"},
+    {id:"d",text:"The server's disk usage statistics"}
+  ], correct:["b"],
+  explanation:"An output guardrail screens the model's generated response before it's delivered to the end user, checking for disallowed content, PII leakage, or other policy violations in what the model produced." },
+
+{ id:"q018", domain:"Guardrails & the A2A Protocol", type:"single", correct_count:1,
+  question:"In a layered guardrail architecture for a production AI agent, what does a 'tool guardrail' typically check?",
+  options:[
+    {id:"a",text:"The color scheme of the agent's chat interface"},
+    {id:"b",text:"The user's billing plan tier only"},
+    {id:"c",text:"Nothing related to tools; it only applies to text generation"},
+    {id:"d",text:"The specific tool call and its parameters before execution — for example, validating that a requested action or its inputs are safe and permitted before the tool actually runs"}
+  ], correct:["d"],
+  explanation:"A tool guardrail validates a proposed tool call and its parameters before execution, checking that the requested action and its inputs are safe and permitted before the tool actually runs." },
+
+{ id:"q019", domain:"Guardrails & the A2A Protocol", type:"single", correct_count:1,
+  question:"What is Google's A2A (Agent2Agent) protocol primarily designed to standardize, and how does it differ from MCP?",
+  options:[
+    {id:"a",text:"A2A and MCP are two names for the exact same protocol with no functional difference"},
+    {id:"b",text:"A2A replaces the need for any AI model to use tools at all"},
+    {id:"c",text:"A2A standardizes communication and task delegation between independent AI agents (potentially built on different frameworks or by different vendors), complementing MCP, which instead standardizes how a single agent connects to tools and data sources"},
+    {id:"d",text:"A2A is used exclusively for image generation, unrelated to agent communication"}
+  ], correct:["c"],
+  explanation:"A2A standardizes how independent agents — even ones built on different frameworks or by different vendors — discover each other and delegate tasks, complementing MCP's focus on connecting a single agent to its tools and data sources." },
+
+{ id:"q020", domain:"Guardrails & the A2A Protocol", type:"single", correct_count:1,
+  question:"In the A2A protocol, what is an 'Agent Card' used for?",
+  options:[
+    {id:"a",text:"A machine-readable document (such as JSON) that an agent publishes to advertise its capabilities, endpoint, and authentication requirements, allowing other agents to discover and interact with it"},
+    {id:"b",text:"A physical ID badge required for data center access"},
+    {id:"c",text:"A billing invoice sent between two agents"},
+    {id:"d",text:"A random unique identifier with no descriptive content"}
+  ], correct:["a"],
+  explanation:"An Agent Card is a machine-readable document an agent publishes describing its capabilities, endpoint, and authentication requirements, enabling other agents to discover it and understand how to interact with it." }
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const TOTAL_TIME = 20 * 60; // seconds
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let currentIndex = 0;
+let answers = {};      // { questionId: optionId }
+let flagged = new Set();
+let tabWarnings = 0;
+let examSubmitted = false;
+let shuffledQuestions = []; // each item: {...question, shuffledOptions:[...]}
+
+/* ---------- Fisher-Yates shuffle ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildShuffledQuestions(){
+  shuffledQuestions = QUESTIONS.map(q => ({
+    ...q,
+    shuffledOptions: shuffle(q.options)
+  }));
+}
+
+/* =========================================================
+   SCREEN NAVIGATION
+   ========================================================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startExam(){
+  buildShuffledQuestions();
+  answers = {};
+  flagged = new Set();
+  tabWarnings = 0;
+  examSubmitted = false;
+  currentIndex = 0;
+  timeLeft = TOTAL_TIME;
+  renderNavGrid();
+  renderQuestion();
+  showScreen('screen-exam');
+  startTimer();
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      finalSubmit(true);
+    }
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s = (timeLeft%60).toString().padStart(2,'0');
+  const pill = document.getElementById('timerPill');
+  pill.textContent = `⏱ ${m}:${s}`;
+  pill.classList.remove('warn','danger');
+  if(timeLeft<=60) pill.classList.add('danger');
+  else if(timeLeft<=300) pill.classList.add('warn');
+}
+
+/* =========================================================
+   RENDER QUESTION
+   ========================================================= */
+function renderQuestion(){
+  const q = shuffledQuestions[currentIndex];
+  document.getElementById('qNum').textContent = currentIndex+1;
+  document.getElementById('qDomain').textContent = q.domain;
+  document.getElementById('qText').textContent = q.question;
+  document.getElementById('flagBtn').classList.toggle('flagged', flagged.has(q.id));
+  document.getElementById('flagBtn').innerHTML = flagged.has(q.id) ? '🚩 Flagged' : '🚩 Flag for review';
+
+  const container = document.getElementById('qOptions');
+  container.innerHTML = '';
+  const selected = answers[q.id];
+  q.shuffledOptions.forEach((opt, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'option' + (selected===opt.id ? ' selected' : '');
+    const letter = String.fromCharCode(65+idx); // display label A/B/C/D based on shuffled position
+    div.innerHTML = `<div class="radio"></div><div class="opt-text"><span class="opt-label">${letter}.</span>${opt.text}</div>`;
+    div.onclick = ()=>selectAnswer(q.id, opt.id);
+    container.appendChild(div);
+  });
+
+  updateHeaderStats();
+  renderNavGrid();
+
+  const isLast = currentIndex === shuffledQuestions.length - 1;
+  const isFirst = currentIndex === 0;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : '';
+  document.getElementById('btnPrev').style.visibility = isFirst ? 'hidden' : 'visible';
+}
+
+function selectAnswer(qId, optId){
+  answers[qId] = optId;
+  renderQuestion();
+}
+
+function toggleFlag(){
+  const q = shuffledQuestions[currentIndex];
+  if(flagged.has(q.id)) flagged.delete(q.id);
+  else flagged.add(q.id);
+  renderQuestion();
+}
+
+function prevQuestion(){
+  if(currentIndex>0){ currentIndex--; renderQuestion(); }
+}
+function nextQuestion(){
+  if(currentIndex<shuffledQuestions.length-1){ currentIndex++; renderQuestion(); }
+}
+
+/* =========================================================
+   HEADER / SIDEBAR STATS
+   ========================================================= */
+function updateHeaderStats(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  document.getElementById('hdrAnswered').textContent = `${answeredCount}/${total}`;
+  document.getElementById('hdrFlagged').textContent = flagged.size;
+  document.getElementById('sideAnswered').textContent = `${answeredCount} / ${total}`;
+  document.getElementById('sideUnanswered').textContent = total - answeredCount;
+  document.getElementById('sideFlagged').textContent = flagged.size;
+}
+
+function renderNavGrid(){
+  const grid = document.getElementById('qnavGrid');
+  grid.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const btn = document.createElement('button');
+    let cls = '';
+    if(idx===currentIndex) cls += ' current';
+    if(flagged.has(q.id)) cls += ' flagged';
+    else if(answers[q.id]) cls += ' answered';
+    btn.className = cls.trim();
+    btn.textContent = idx+1;
+    btn.onclick = ()=>{ currentIndex = idx; renderQuestion(); };
+    grid.appendChild(btn);
+  });
+}
+
+/* =========================================================
+   TAB SWITCH DETECTION
+   ========================================================= */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && !examSubmitted && document.getElementById('screen-exam').classList.contains('active')){
+    tabWarnings++;
+    if(tabWarnings>=3){
+      document.getElementById('tabWarnText').textContent = "You've received 3 tab-switch warnings. Your exam has been automatically submitted.";
+      document.getElementById('tabWarnModal').classList.add('active');
+      setTimeout(()=>{ finalSubmit(true); }, 1400);
+    } else {
+      document.getElementById('tabWarnText').textContent = `Switching tabs or minimizing the browser is not allowed during the exam. Warning ${tabWarnings} of 3 — after 3 warnings your exam will auto-submit.`;
+      document.getElementById('tabWarnModal').classList.add('active');
+    }
+  }
+});
+function closeTabWarn(){
+  document.getElementById('tabWarnModal').classList.remove('active');
+}
+
+/* =========================================================
+   SUBMIT FLOW
+   ========================================================= */
+function requestSubmit(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  const unanswered = total - answeredCount;
+  document.getElementById('submitModalText').textContent = unanswered>0
+    ? `You still have ${unanswered} unanswered question${unanswered>1?'s':''}. Once submitted, you cannot change your answers.`
+    : `All questions answered. Once submitted, you cannot change your answers.`;
+  document.getElementById('submitModal').classList.add('active');
+}
+function closeSubmitModal(){
+  document.getElementById('submitModal').classList.remove('active');
+}
+
+let lastResults = null;
+
+function finalSubmit(auto){
+  if(examSubmitted) return;
+  examSubmitted = true;
+  clearInterval(timerInterval);
+  document.getElementById('submitModal').classList.remove('active');
+  document.getElementById('tabWarnModal').classList.remove('active');
+  computeResults();
+  renderResults();
+  showScreen('screen-results');
+}
+
+/* =========================================================
+   SCORING
+   ========================================================= */
+function computeResults(){
+  const domainStats = {}; // domain -> {correct, total}
+  let correctCount = 0;
+  shuffledQuestions.forEach(q=>{
+    if(!domainStats[q.domain]) domainStats[q.domain] = {correct:0,total:0};
+    domainStats[q.domain].total++;
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    if(isCorrect){ correctCount++; domainStats[q.domain].correct++; }
+  });
+  const total = shuffledQuestions.length;
+  const pct = Math.round((correctCount/total)*100);
+  lastResults = { correctCount, total, pct, pass: pct>=70, domainStats };
+}
+
+/* =========================================================
+   RESULTS RENDER
+   ========================================================= */
+function renderResults(){
+  const r = lastResults;
+  document.getElementById('scorePct').textContent = r.pct + '%';
+  const ringColor = r.pass ? '#8DC63F' : '#E5484D';
+  document.getElementById('scoreRing').style.background =
+    `conic-gradient(${ringColor} ${r.pct*3.6}deg, #E8EAEE 0deg)`;
+
+  const passPill = document.getElementById('passPill');
+  passPill.textContent = r.pass ? '✓ PASS' : '✕ FAIL';
+  passPill.className = 'pass-pill ' + (r.pass ? 'pass' : 'fail');
+
+  document.getElementById('resultSub').textContent =
+    `You scored ${r.correctCount} out of ${r.total} questions correctly. Passing score is 70%.`;
+
+  const body = document.getElementById('domainBreakdownBody');
+  body.innerHTML = '';
+  Object.entries(r.domainStats).forEach(([domain, stat])=>{
+    const dpct = Math.round((stat.correct/stat.total)*100);
+    const barClass = dpct>=70 ? '' : (dpct>=40 ? 'mid' : 'low');
+    const row = document.createElement('div');
+    row.className = 'db-row';
+    row.innerHTML = `
+      <div class="db-top"><span>${domain}</span><span>${stat.correct}/${stat.total} (${dpct}%)</span></div>
+      <div class="db-bar-track"><div class="db-bar-fill ${barClass}" style="width:${dpct}%;"></div></div>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function retakeExam(){
+  startExam();
+}
+
+/* =========================================================
+   REVIEW MODE
+   ========================================================= */
+let reviewFilter = 'all';
+
+function openReview(){
+  reviewFilter = 'all';
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
+  renderReview();
+  showScreen('screen-review');
+}
+function backToResults(){
+  showScreen('screen-results');
+}
+function setReviewFilter(f){
+  reviewFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.filter-chip[data-filter="${f}"]`).classList.add('active');
+  renderReview();
+}
+
+function renderReview(){
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    const isSkipped = !userAns;
+    let status = isSkipped ? 'skipped' : (isCorrect ? 'correct' : 'incorrect');
+
+    if(reviewFilter!=='all' && reviewFilter!==status) return;
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    let optsHtml = '';
+    q.shuffledOptions.forEach((opt,i)=>{
+      const letter = String.fromCharCode(65+i);
+      let cls = '';
+      if(q.correct.includes(opt.id)) cls = 'correctAns';
+      else if(userAns===opt.id && !isCorrect) cls = 'wrongPicked';
+      let tag = '';
+      if(q.correct.includes(opt.id)) tag = ' ✓ Correct answer';
+      else if(userAns===opt.id) tag = ' ✕ Your answer';
+      optsHtml += `<div class="r-opt ${cls}"><span><b>${letter}.</b> ${opt.text}${tag ? '<br><small>'+tag+'</small>' : ''}</span></div>`;
+    });
+
+    card.innerHTML = `
+      <div class="rtop">
+        <span class="q-count">Question ${idx+1} · ${q.domain}</span>
+        <span class="status-chip ${status}">${status}</span>
+      </div>
+      <div class="rq">${q.question}</div>
+      ${optsHtml}
+      <div class="r-explain"><b>Explanation:</b> ${q.explanation}</div>
+    `;
+    list.appendChild(card);
+  });
+
+  if(list.innerHTML===''){
+    list.innerHTML = `<div class="review-card" style="text-align:center;color:var(--text-3);">No questions match this filter.</div>`;
+  }
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildShuffledQuestions();
+</script>
+</body>
+</html>
