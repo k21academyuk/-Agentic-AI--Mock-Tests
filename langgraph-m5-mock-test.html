@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LangGraph Core Workflow Patterns (Module 5) — K21 Academy Mock Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#F7F8FA; --surface:#FFFFFF; --border:#E8EAEE;
+    --text-1:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
+    --green:#8DC63F; --green-mid:#79B030; --green-bg:#F1F8E8; --green-dark:#4A7A1B;
+    --navy:#1A1248; --navy-mid:#2E2080; --blue:#1B9BD9;
+    --red:#E5484D; --red-bg:#FDECEC; --amber:#F5A623; --amber-bg:#FFF6E5;
+    --radius:16px; --radius-lg:24px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ---------- Top brand bar ---------- */
+  .topbar{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
+  .topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);}
+  .topbar .badge{background:rgba(141,198,63,.18);color:var(--green);border:1px solid rgba(141,198,63,.4);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+
+  /* ---------- Intro Screen ---------- */
+  #screen-intro .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .intro-hero{text-align:center;margin-bottom:32px;}
+  .intro-hero .eyebrow{display:inline-block;background:var(--green-bg);color:var(--green-dark);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px;}
+  .intro-hero h1{font-size:32px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .intro-hero p{color:var(--text-2);font-size:15px;max-width:640px;margin:0 auto;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0;}
+  .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 14px;text-align:center;}
+  .stat-card .label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:6px;}
+  .stat-card .value{font-size:20px;font-weight:800;color:var(--navy);}
+
+  .domain-table{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:28px;}
+  .domain-table h3{padding:18px 22px 0;font-size:16px;font-weight:800;color:var(--navy);}
+  .domain-table table{width:100%;border-collapse:collapse;margin-top:14px;}
+  .domain-table th{background:var(--green-bg);color:var(--green-dark);font-size:12px;text-transform:uppercase;letter-spacing:.03em;text-align:left;padding:10px 22px;}
+  .domain-table td{padding:12px 22px;font-size:14px;border-top:1px solid var(--border);color:var(--text-1);}
+  .domain-table td.weight{font-weight:700;color:var(--navy);text-align:right;}
+
+  .rules-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;}
+  .rules-card h3{color:var(--navy);font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .rules-card ul{list-style:none;}
+  .rules-card li{padding:9px 0 9px 26px;position:relative;font-size:14px;color:var(--text-2);border-top:1px solid var(--border);}
+  .rules-card li:first-child{border-top:none;}
+  .rules-card li::before{content:"⚠";position:absolute;left:0;color:var(--amber);font-size:13px;top:9px;}
+
+  .btn-primary{background:var(--green);color:#0f2a05;font-weight:700;font-size:16px;padding:16px 20px;border-radius:12px;width:100%;transition:.15s;box-shadow:0 4px 14px rgba(141,198,63,.35);}
+  .btn-primary:hover{background:var(--green-mid);transform:translateY(-1px);}
+  .btn-secondary{background:var(--surface);color:var(--navy);font-weight:700;font-size:14px;padding:12px 20px;border-radius:10px;border:1.5px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--navy);}
+  .btn-outline-red{background:#fff;color:var(--red);border:1.5px solid var(--red);font-weight:700;padding:10px 18px;border-radius:10px;}
+
+  /* ---------- Exam Screen ---------- */
+  #screen-exam .exam-header{background:var(--navy);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20;}
+  .exam-header .left{display:flex;align-items:center;gap:14px;font-size:13px;}
+  .exam-header .left .title{font-weight:700;font-size:14px;}
+  .exam-header .stats{display:flex;gap:18px;font-size:13px;color:#cfd0e6;}
+  .exam-header .stats b{color:#fff;}
+  .timer-pill{background:rgba(255,255,255,.1);padding:7px 16px;border-radius:999px;font-weight:800;font-size:15px;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+  .timer-pill.warn{background:rgba(245,166,35,.25);color:#ffd48a;}
+  .timer-pill.danger{background:rgba(229,72,77,.28);color:#ffb3b5;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+  .exam-layout{display:grid;grid-template-columns:1fr 300px;gap:0;max-width:1280px;margin:0 auto;align-items:start;}
+  .exam-main{padding:28px 32px 100px;}
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .q-count{font-size:13px;color:var(--text-3);font-weight:700;}
+  .domain-chip{background:var(--green-bg);color:var(--green-dark);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;}
+  .flag-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .flag-btn.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+
+  .question-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px 26px 8px;margin-bottom:20px;}
+  .question-text{font-size:17px;font-weight:600;color:var(--text-1);margin-bottom:20px;line-height:1.55;}
+
+  .option{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:.12s;}
+  .option:hover{border-color:var(--green);background:var(--green-bg);}
+  .option.selected{border-color:var(--green);background:var(--green-bg);}
+  .option .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-3);flex-shrink:0;margin-top:1px;position:relative;}
+  .option.selected .radio{border-color:var(--green-mid);}
+  .option.selected .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--green-mid);}
+  .option .opt-text{font-size:14.5px;color:var(--text-1);}
+  .option .opt-label{font-weight:800;color:var(--navy-mid);margin-right:6px;}
+
+  .nav-buttons{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .nav-buttons button{padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;}
+  .btn-prev{background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .btn-next{background:var(--navy);color:#fff;}
+  .btn-submit-inline{background:var(--green);color:#0f2a05;}
+
+  /* ---------- Sidebar navigator ---------- */
+  .sidebar{padding:28px 24px;position:sticky;top:64px;}
+  .sidebar-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;}
+  .sidebar-card h4{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);font-weight:800;margin-bottom:12px;}
+  .progress-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);padding:6px 0;}
+  .progress-row b{color:var(--navy);}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text-2);margin-top:10px;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .qnav-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .qnav-grid button{aspect-ratio:1;border-radius:8px;font-size:12.5px;font-weight:700;background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .qnav-grid button.answered{background:var(--green-bg);border-color:var(--green);color:var(--green-dark);}
+  .qnav-grid button.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+  .qnav-grid button.current{outline:2.5px solid var(--navy);outline-offset:1px;}
+  .submit-btn-side{width:100%;background:var(--navy);color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:14px;}
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:#fff;border-radius:var(--radius-lg);padding:30px;max-width:420px;width:100%;text-align:center;}
+  .modal-box .icon{font-size:38px;margin-bottom:10px;}
+  .modal-box h3{font-size:19px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .modal-box p{font-size:14px;color:var(--text-2);margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;font-size:14px;}
+
+  /* ---------- Results screen ---------- */
+  #screen-results .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .result-hero{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:36px;text-align:center;margin-bottom:24px;}
+  .score-ring{width:170px;height:170px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;position:relative;}
+  .score-ring .inner{width:136px;height:136px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-ring .inner .pct{font-size:34px;font-weight:800;color:var(--navy);}
+  .score-ring .inner .lbl{font-size:11px;color:var(--text-3);text-transform:uppercase;font-weight:700;}
+  .pass-pill{display:inline-block;padding:8px 20px;border-radius:999px;font-weight:800;font-size:14px;margin-bottom:6px;}
+  .pass-pill.pass{background:var(--green-bg);color:var(--green-dark);}
+  .pass-pill.fail{background:var(--red-bg);color:#a11d21;}
+  .result-sub{color:var(--text-2);font-size:14px;}
+
+  .domain-breakdown{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px;margin-bottom:24px;}
+  .domain-breakdown h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:18px;}
+  .db-row{margin-bottom:16px;}
+  .db-row .db-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;color:var(--text-1);font-weight:600;}
+  .db-bar-track{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
+  .db-bar-fill{height:100%;border-radius:999px;background:var(--green);}
+  .db-bar-fill.low{background:var(--red);}
+  .db-bar-fill.mid{background:var(--amber);}
+
+  .result-actions{display:flex;gap:14px;}
+  .result-actions button{flex:1;padding:15px;border-radius:12px;font-weight:700;font-size:14.5px;}
+
+  /* ---------- Review screen ---------- */
+  #screen-review .review-header{background:var(--navy);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;flex-wrap:wrap;gap:10px;}
+  .review-wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .filter-chip{background:#fff;border:1.5px solid var(--border);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .filter-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .review-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;}
+  .review-card .rtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .status-chip{font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;text-transform:uppercase;}
+  .status-chip.correct{background:var(--green-bg);color:var(--green-dark);}
+  .status-chip.incorrect{background:var(--red-bg);color:#a11d21;}
+  .status-chip.skipped{background:#F3F4F6;color:var(--text-2);}
+  .review-card .rq{font-weight:600;font-size:15px;margin-bottom:14px;}
+  .r-opt{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:13.5px;display:flex;gap:8px;align-items:flex-start;}
+  .r-opt.correctAns{border-color:var(--green);background:var(--green-bg);}
+  .r-opt.wrongPicked{border-color:var(--red);background:var(--red-bg);}
+  .r-explain{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-2);margin-top:10px;border-left:3px solid var(--blue);}
+  .r-explain b{color:var(--navy);}
+
+  @media (max-width:900px){
+    .exam-layout{grid-template-columns:1fr;}
+    .sidebar{position:static;order:-1;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO SCREEN ================= -->
+<section id="screen-intro" class="screen active">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Agentic AI Course · Module 5</div>
+  </div>
+  <div class="wrap">
+    <div class="intro-hero">
+      <span class="eyebrow">🧠 Mock Test Simulator</span>
+      <h1>LangGraph Core Workflow Patterns</h1>
+      <p>Module 5 — Practice in a realistic exam environment with a timer, question navigator, flagging, and instant feedback after submission.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Questions</div><div class="value">20</div></div>
+      <div class="stat-card"><div class="label">Time Limit</div><div class="value">20 Min</div></div>
+      <div class="stat-card"><div class="label">Passing Score</div><div class="value">70%</div></div>
+      <div class="stat-card"><div class="label">Question Type</div><div class="value">Single Select</div></div>
+    </div>
+
+    <div class="rules-card">
+      <h3>⚠ Exam Rules — Read Before Starting</h3>
+      <ul>
+        <li>Do NOT switch tabs or minimize the browser — your exam will be paused and a warning issued.</li>
+        <li>3 tab-switch warnings will automatically end and submit your exam.</li>
+        <li>Each question has exactly one correct answer. Partial credit is not given.</li>
+        <li>You can flag questions for review and return to them any time before submitting.</li>
+        <li>Once submitted, answers cannot be changed.</li>
+      </ul>
+    </div>
+
+    <button class="btn-primary" onclick="startExam()">▶ Start Exam Now</button>
+  </div>
+</section>
+
+<!-- ================= EXAM SCREEN ================= -->
+<section id="screen-exam" class="screen">
+  <div class="exam-header">
+    <div class="left">
+      <span class="title">K21 · LangGraph Core Workflow Patterns (M5)</span>
+    </div>
+    <div class="stats">
+      <span>Answered <b id="hdrAnswered">0/20</b></span>
+      <span>Flagged <b id="hdrFlagged">0</b></span>
+    </div>
+    <div class="timer-pill" id="timerPill">⏱ 20:00</div>
+  </div>
+
+  <div class="exam-layout">
+    <div class="exam-main">
+      <div class="q-meta">
+        <span class="q-count">Question <b id="qNum">1</b> of 20</span>
+        <span class="domain-chip" id="qDomain">—</span>
+        <button class="flag-btn" id="flagBtn" onclick="toggleFlag()">🚩 Flag for review</button>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text" id="qText">Loading...</div>
+        <div id="qOptions"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-prev" id="btnPrev" onclick="prevQuestion()">← Prev</button>
+        <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+        <button class="btn-submit-inline" id="btnSubmitInline" onclick="requestSubmit()">Submit Exam →</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <h4>Progress</h4>
+        <div class="progress-row"><span>Answered</span><b id="sideAnswered">0 / 20</b></div>
+        <div class="progress-row"><span>Unanswered</span><b id="sideUnanswered">20</b></div>
+        <div class="progress-row"><span>Flagged</span><b id="sideFlagged">0</b></div>
+      </div>
+      <div class="sidebar-card">
+        <h4>Question Navigator</h4>
+        <div class="qnav-grid" id="qnavGrid"></div>
+        <div class="legend">
+          <span><i style="background:var(--navy);"></i>Current</span>
+          <span><i style="background:var(--green-bg);border:1px solid var(--green);"></i>Answered</span>
+          <span><i style="background:var(--amber-bg);border:1px solid var(--amber);"></i>Flagged</span>
+          <span><i style="background:#fff;border:1px solid var(--border);"></i>Unanswered</span>
+        </div>
+      </div>
+      <button class="submit-btn-side" onclick="requestSubmit()">Submit Exam →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS SCREEN ================= -->
+<section id="screen-results" class="screen">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Results</div>
+  </div>
+  <div class="wrap">
+    <div class="result-hero">
+      <div class="score-ring" id="scoreRing">
+        <div class="inner">
+          <div class="pct" id="scorePct">0%</div>
+          <div class="lbl">Score</div>
+        </div>
+      </div>
+      <div class="pass-pill" id="passPill">—</div>
+      <div class="result-sub" id="resultSub">You scored 0 out of 20 questions correctly.</div>
+    </div>
+
+    <div class="domain-breakdown">
+      <h3>📊 Domain-wise Breakdown</h3>
+      <div id="domainBreakdownBody"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-secondary" style="flex:1;" onclick="retakeExam()">↺ Retake Exam</button>
+      <button class="btn-primary" style="flex:1;box-shadow:none;" onclick="openReview()">🔍 Review All Questions</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVIEW SCREEN ================= -->
+<section id="screen-review" class="screen">
+  <div class="review-header">
+    <div class="brand"><span class="dot"></span> Review Mode — LangGraph Core Workflow Patterns M5</div>
+    <button class="btn-secondary" onclick="backToResults()">← Back to Results</button>
+  </div>
+  <div class="review-wrap">
+    <div class="filter-row">
+      <button class="filter-chip active" data-filter="all" onclick="setReviewFilter('all')">All (20)</button>
+      <button class="filter-chip" data-filter="correct" onclick="setReviewFilter('correct')">Correct</button>
+      <button class="filter-chip" data-filter="incorrect" onclick="setReviewFilter('incorrect')">Incorrect</button>
+      <button class="filter-chip" data-filter="skipped" onclick="setReviewFilter('skipped')">Skipped</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+</section>
+
+<!-- ================= MODALS ================= -->
+<div class="modal-overlay" id="tabWarnModal">
+  <div class="modal-box">
+    <div class="icon">🚨</div>
+    <h3>You Left the Exam!</h3>
+    <p id="tabWarnText">Switching tabs or minimizing the browser is not allowed during the exam.</p>
+    <div class="modal-actions">
+      <button class="btn-primary" style="box-shadow:none;" onclick="closeTabWarn()">Return to Exam</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="submitModal">
+  <div class="modal-box">
+    <div class="icon">📤</div>
+    <h3>Submit Exam?</h3>
+    <p id="submitModalText">You still have unanswered questions. Once submitted, you cannot change your answers.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSubmitModal()">Cancel</button>
+      <button class="btn-primary" style="box-shadow:none;background:var(--red);color:#fff;" onclick="finalSubmit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK — LangGraph Core Workflow Patterns (Module 5)
+   ========================================================= */
+const QUESTIONS = [
+{ id:"q001", domain:"Agentic AI Landscape & Stack Foundations", type:"single", correct_count:1,
+  question:"In an 'AI workflow' (as distinct from an AI agent), who determines what step happens next?",
+  options:[
+    {id:"a",text:"The developer defines every step, sequence, and branching condition in advance; the LLM only supplies content within that fixed structure"},
+    {id:"b",text:"The LLM decides every next step and tool call autonomously"},
+    {id:"c",text:"A separate reinforcement learning policy trained specifically for routing"},
+    {id:"d",text:"The end user manually selects each step during execution"}
+  ], correct:["a"],
+  explanation:"In an AI workflow, the developer defines every step, data flow, and branching condition in advance; the LLM contributes content (summaries, classifications, drafts) but never decides what happens next." },
+
+{ id:"q002", domain:"Agentic AI Landscape & Stack Foundations", type:"single", correct_count:1,
+  question:"What is the key difference in autonomy between an 'AI agent' and a pure 'AI workflow'?",
+  options:[
+    {id:"a",text:"An AI agent never uses tools, while a workflow always uses tools"},
+    {id:"b",text:"A workflow is always slower than an agent regardless of task"},
+    {id:"c",text:"An AI agent hands control to the LLM to decide which tool to call and whether to take further action, while a workflow follows developer-defined paths where the LLM only fills in content"},
+    {id:"d",text:"There is no difference; the two terms describe identical architectures"}
+  ], correct:["c"],
+  explanation:"An AI agent hands control to the LLM itself: it decides which tool to call, interprets results, and determines whether to act again or return a final answer — unlike a workflow, where all paths are predefined by the developer." },
+
+{ id:"q003", domain:"Agentic AI Landscape & Stack Foundations", type:"single", correct_count:1,
+  question:"In the LangChain / LangGraph / LangSmith stack, which tool is primarily responsible for graph-based orchestration of multi-step workflows, including parallel fan-out and human-in-the-loop interrupts?",
+  options:[
+    {id:"a",text:"LangSmith"},
+    {id:"b",text:"LangGraph"},
+    {id:"c",text:"A vector database"},
+    {id:"d",text:"A prompt template library"}
+  ], correct:["b"],
+  explanation:"LangChain builds individual agents and tools, LangGraph adds graph-based orchestration for multi-step workflows (states, nodes, edges, fan-out, HITL interrupts), and LangSmith provides observability, tracing, and evaluation." },
+
+{ id:"q004", domain:"Agentic AI Landscape & Stack Foundations", type:"single", correct_count:1,
+  question:"A developer needs a workflow with complex conditional routing, Mermaid-diagram visualization, and support for dynamic parallel fan-out. Which LangGraph API is the better fit compared to the alternative?",
+  options:[
+    {id:"a",text:"The Functional API (@entrypoint/@task), since it always outperforms the Graph API"},
+    {id:"b",text:"Neither API supports conditional routing"},
+    {id:"c",text:"A plain Python for-loop with no framework at all"},
+    {id:"d",text:"The Graph API (StateGraph), which offers explicit nodes and edges, built-in visualization, and advanced routing/fan-out features that the simpler Functional API does not provide"}
+  ], correct:["d"],
+  explanation:"The Graph API (StateGraph) uses explicit nodes and edges, gives built-in Mermaid visualization, and supports advanced features like the Send API for fan-out — capabilities the simpler, decorator-based Functional API does not offer." },
+
+{ id:"q005", domain:"LangGraph State Management", type:"single", correct_count:1,
+  question:"In LangGraph, a workflow's state schema is typically defined using which Python construct?",
+  options:[
+    {id:"a",text:"A single global variable shared across all nodes with no schema"},
+    {id:"b",text:"A compiled binary configuration file"},
+    {id:"c",text:"A TypedDict declaring the fields that nodes can read from and write to"},
+    {id:"d",text:"An unstructured JSON blob with no declared fields"}
+  ], correct:["c"],
+  explanation:"LangGraph workflows begin with a state schema defined as a Python TypedDict, declaring all the fields that nodes can read and write during execution." },
+
+{ id:"q006", domain:"LangGraph State Management", type:"single", correct_count:1,
+  question:"When a node in a LangGraph workflow finishes executing, what does it return to update the graph's state?",
+  options:[
+    {id:"a",text:"Only a partial update containing the fields it changed; LangGraph merges this into the existing state automatically"},
+    {id:"b",text:"The complete state object, re-including every field whether or not it changed"},
+    {id:"c",text:"Nothing; state updates happen automatically without any return value"},
+    {id:"d",text:"A fully serialized copy of the previous node's output only"}
+  ], correct:["a"],
+  explanation:"Each node returns only the fields it changed — a partial update — and LangGraph automatically merges that into the existing state, which keeps node functions simple and prevents accidental overwrites of unrelated fields." },
+
+{ id:"q007", domain:"LangGraph State Management", type:"single", correct_count:1,
+  question:"Multiple parallel worker nodes all need to write to the same state field without one worker's result overwriting another's. Which LangGraph mechanism addresses this safely?",
+  options:[
+    {id:"a",text:"Running the workers sequentially instead of in parallel, avoiding the issue entirely"},
+    {id:"b",text:"Manually locking the entire graph so only one worker can exist at a time"},
+    {id:"c",text:"Disabling state updates for parallel nodes"},
+    {id:"d",text:"A reducer, such as annotating the field with Annotated[list, operator.add], so each worker's output is appended rather than overwritten"}
+  ], correct:["d"],
+  explanation:"Reducers, such as annotating a field with Annotated[list, operator.add], tell LangGraph to append each parallel worker's output to the list instead of the last one overwriting the others." },
+
+{ id:"q008", domain:"LangGraph State Management", type:"single", correct_count:1,
+  question:"What is the key difference between the state used by workers created via the Send API and the graph's main state?",
+  options:[
+    {id:"a",text:"There is no difference; workers always read and write directly to the main state"},
+    {id:"b",text:"Workers created via the Send API get their own private state to process a subtask independently, and their results flow back into the main state only through reducer-annotated fields"},
+    {id:"c",text:"Worker state cannot be used at all; only the main state exists"},
+    {id:"d",text:"Worker state permanently replaces the main state once a worker finishes"}
+  ], correct:["b"],
+  explanation:"The Send API creates worker instances with their own private state, separate from the main graph state; results flow back into the main state through reducer-annotated fields, enabling safe aggregation without coordination between workers." },
+
+{ id:"q009", domain:"LangGraph State Management", type:"single", correct_count:1,
+  question:"A team needs conversation state to persist within a single ongoing conversation thread, while a separate need exists to recall customer preferences across entirely different conversation sessions. Which pairing of memory types addresses these two needs respectively?",
+  options:[
+    {id:"a",text:"Thread memory (e.g., a thread-scoped checkpointer) for within-conversation continuity, and a cross-session store (e.g., a key-value store scoped across threads) for persisting data across conversations"},
+    {id:"b",text:"A single in-memory Python list used for both purposes"},
+    {id:"c",text:"Neither need can be addressed by LangGraph's memory architecture"},
+    {id:"d",text:"Cross-session storage for within-conversation continuity, and thread memory for cross-session recall — the reverse pairing"}
+  ], correct:["a"],
+  explanation:"LangGraph's layered memory architecture uses thread-scoped memory for continuity within one conversation, and a separate cross-session store for data (like customer history or preferences) that needs to persist across different conversation threads." },
+
+{ id:"q010", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"In the 'Prompt Chaining' workflow pattern, what is the purpose of placing quality gates between sequential LLM calls?",
+  options:[
+    {id:"a",text:"To randomly discard some steps to reduce cost"},
+    {id:"b",text:"To increase the number of tokens used regardless of quality"},
+    {id:"c",text:"To remove the need for any LLM calls after the first one"},
+    {id:"d",text:"To check intermediate results before proceeding, preventing errors from one step from silently propagating into later steps"}
+  ], correct:["d"],
+  explanation:"Quality gates between chained steps check intermediate results before the workflow proceeds, catching errors early rather than letting them silently propagate and compound through later steps." },
+
+{ id:"q011", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"The 'Routing' pattern classifies an input and directs it to a specialized handler. What is the key constraint that distinguishes this from a more autonomous agent making its own decisions?",
+  options:[
+    {id:"a",text:"The destination is chosen entirely at random with no classification step"},
+    {id:"b",text:"Routing never involves any LLM call"},
+    {id:"c",text:"The LLM decides where the input goes, but all possible destination paths are predefined by the developer in advance"},
+    {id:"d",text:"Every possible handler must always execute regardless of the classification"}
+  ], correct:["c"],
+  explanation:"In routing, the LLM decides WHERE an input goes, but every possible destination path is predefined by the developer — the LLM classifies within a fixed set of options rather than inventing new actions." },
+
+{ id:"q012", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"Which combination of techniques is typically used to make a routing step's classification reliable enough to drive conditional edges in a graph?",
+  options:[
+    {id:"a",text:"A single unvalidated free-text response"},
+    {id:"b",text:"Structured output (e.g., a Pydantic schema) constraining the classification response, combined with conditional edges that branch based on that structured result"},
+    {id:"c",text:"Random selection among available handlers"},
+    {id:"d",text:"Ignoring the classification result entirely and always taking the same path"}
+  ], correct:["b"],
+  explanation:"Reliable routing typically combines structured output — constraining the classification to a defined schema — with conditional edges that branch based on that structured, validated result, rather than parsing free-text guesses." },
+
+{ id:"q013", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"In the 'Parallelization' pattern, what do the terms 'fan-out' and 'fan-in' refer to, respectively?",
+  options:[
+    {id:"a",text:"Fan-out refers to compressing multiple outputs into one; fan-in refers to expanding one output into many"},
+    {id:"b",text:"Fan-out and fan-in both refer to the same sequential process repeated twice"},
+    {id:"c",text:"Fan-out refers to deleting unused workers; fan-in refers to creating new workers"},
+    {id:"d",text:"Fan-out refers to distributing work to multiple parallel workers; fan-in refers to aggregating their results back together"}
+  ], correct:["d"],
+  explanation:"Fan-out distributes independent subtasks to multiple parallel workers to run simultaneously, while fan-in aggregates their individual results back into a combined output." },
+
+{ id:"q014", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"Which LangGraph feature is most closely associated with implementing dynamic fan-out, where the number of parallel worker instances is determined at runtime rather than hardcoded in advance?",
+  options:[
+    {id:"a",text:"A fixed, hardcoded list of exactly two nodes"},
+    {id:"b",text:"The Send API, which creates worker instances at runtime based on the input or an orchestrator's generated plan"},
+    {id:"c",text:"The MemorySaver checkpointer"},
+    {id:"d",text:"The dynamic_prompt middleware"}
+  ], correct:["b"],
+  explanation:"The Send API creates worker instances dynamically at runtime, sized according to the input or an orchestrator's generated plan, rather than requiring a fixed, hardcoded number of parallel branches." },
+
+{ id:"q015", domain:"Sequential & Parallel Workflow Patterns", type:"single", correct_count:1,
+  question:"A workflow needs to run four independent analysis subtasks simultaneously and then safely combine all four results into a single list field in the final state. Which combination of features would correctly support this?",
+  options:[
+    {id:"a",text:"The Send API for dynamic fan-out, combined with a reducer (e.g., Annotated[list, operator.add]) on the shared results field so each worker's output is appended rather than overwritten"},
+    {id:"b",text:"A single sequential node with no state annotations"},
+    {id:"c",text:"Random ordering of node execution with no aggregation"},
+    {id:"d",text:"A single global variable modified by print statements"}
+  ], correct:["a"],
+  explanation:"Running independent subtasks in parallel and safely merging their outputs requires the Send API for fan-out plus a reducer-annotated results field so each worker appends its output instead of one overwriting the others." },
+
+{ id:"q016", domain:"Orchestrator-Worker & Evaluator-Optimizer Patterns", type:"single", correct_count:1,
+  question:"In the 'Orchestrator-Worker' pattern, what is generated dynamically at runtime, rather than hardcoded by the developer in advance?",
+  options:[
+    {id:"a",text:"The programming language used to write the workflow"},
+    {id:"b",text:"The total number of LLM providers available"},
+    {id:"c",text:"The plan of subtasks the orchestrator delegates to specialized workers, based on the specific input it receives"},
+    {id:"d",text:"The name of the LangGraph library itself"}
+  ], correct:["c"],
+  explanation:"In the Orchestrator-Worker pattern, the orchestrator dynamically plans the subtasks based on the specific input at runtime — the plan is generated on the fly, not hardcoded in advance." },
+
+{ id:"q017", domain:"Orchestrator-Worker & Evaluator-Optimizer Patterns", type:"single", correct_count:1,
+  question:"Which LangGraph feature is typically used to delegate the orchestrator's dynamically generated subtasks to individual worker instances in the Orchestrator-Worker pattern?",
+  options:[
+    {id:"a",text:"The HumanInTheLoopMiddleware"},
+    {id:"b",text:"A hardcoded sequence of exactly three nodes"},
+    {id:"c",text:"The dynamic_prompt middleware only"},
+    {id:"d",text:"The Send API, for fan-out based on the orchestrator's generated plan"}
+  ], correct:["d"],
+  explanation:"The Send API is used for dynamic fan-out based on the orchestrator's generated plan, delegating each planned subtask to its own worker instance." },
+
+{ id:"q018", domain:"Orchestrator-Worker & Evaluator-Optimizer Patterns", type:"single", correct_count:1,
+  question:"In the 'Evaluator-Optimizer' pattern, what causes the generate-evaluate-revise cycle to stop?",
+  options:[
+    {id:"a",text:"Either a quality threshold is met, or a maximum iteration count is reached, whichever comes first"},
+    {id:"b",text:"The cycle never stops once started"},
+    {id:"c",text:"The cycle stops only when the developer manually restarts the entire process"},
+    {id:"d",text:"The cycle stops immediately after the very first generation, regardless of quality"}
+  ], correct:["a"],
+  explanation:"The Evaluator-Optimizer's generate-evaluate-revise loop continues until either a defined quality threshold is met or a maximum iteration count is reached, whichever condition triggers first." },
+
+{ id:"q019", domain:"Orchestrator-Worker & Evaluator-Optimizer Patterns", type:"single", correct_count:1,
+  question:"Why is a maximum iteration count important in a cyclic Evaluator-Optimizer graph, even when a quality threshold is also defined?",
+  options:[
+    {id:"a",text:"It has no real purpose since the quality threshold alone is always sufficient"},
+    {id:"b",text:"It forces the workflow to always run exactly one iteration regardless of quality"},
+    {id:"c",text:"It prevents the workflow from looping indefinitely (and incurring unbounded cost/latency) in cases where the quality threshold is never satisfied"},
+    {id:"d",text:"It disables the evaluator step entirely after the first pass"}
+  ], correct:["c"],
+  explanation:"A maximum iteration count acts as a safety net: if the quality threshold is never met, the cap prevents the cyclic graph from looping indefinitely and running up unbounded cost or latency." },
+
+{ id:"q020", domain:"Orchestrator-Worker & Evaluator-Optimizer Patterns", type:"single", correct_count:1,
+  question:"A compliance report generation workflow runs a section through up to three validation checks, revising the section if any check fails, with a hard cap of three revision cycles. Which core workflow pattern does this describe?",
+  options:[
+    {id:"a",text:"Routing"},
+    {id:"b",text:"Evaluator-Optimizer, using a cyclic graph with a conditional edge that revisits the revision node until quality passes or the iteration cap is reached"},
+    {id:"c",text:"Swarm"},
+    {id:"d",text:"Prompt Chaining with no conditional logic"}
+  ], correct:["b"],
+  explanation:"A generate-validate-revise cycle with a maximum iteration cap is the Evaluator-Optimizer pattern: a cyclic graph with a conditional edge that routes back to revision until quality checks pass or the iteration limit is hit." }
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const TOTAL_TIME = 20 * 60; // seconds
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let currentIndex = 0;
+let answers = {};      // { questionId: optionId }
+let flagged = new Set();
+let tabWarnings = 0;
+let examSubmitted = false;
+let shuffledQuestions = []; // each item: {...question, shuffledOptions:[...]}
+
+/* ---------- Fisher-Yates shuffle ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildShuffledQuestions(){
+  shuffledQuestions = QUESTIONS.map(q => ({
+    ...q,
+    shuffledOptions: shuffle(q.options)
+  }));
+}
+
+/* =========================================================
+   SCREEN NAVIGATION
+   ========================================================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startExam(){
+  buildShuffledQuestions();
+  answers = {};
+  flagged = new Set();
+  tabWarnings = 0;
+  examSubmitted = false;
+  currentIndex = 0;
+  timeLeft = TOTAL_TIME;
+  renderNavGrid();
+  renderQuestion();
+  showScreen('screen-exam');
+  startTimer();
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      finalSubmit(true);
+    }
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s = (timeLeft%60).toString().padStart(2,'0');
+  const pill = document.getElementById('timerPill');
+  pill.textContent = `⏱ ${m}:${s}`;
+  pill.classList.remove('warn','danger');
+  if(timeLeft<=60) pill.classList.add('danger');
+  else if(timeLeft<=300) pill.classList.add('warn');
+}
+
+/* =========================================================
+   RENDER QUESTION
+   ========================================================= */
+function renderQuestion(){
+  const q = shuffledQuestions[currentIndex];
+  document.getElementById('qNum').textContent = currentIndex+1;
+  document.getElementById('qDomain').textContent = q.domain;
+  document.getElementById('qText').textContent = q.question;
+  document.getElementById('flagBtn').classList.toggle('flagged', flagged.has(q.id));
+  document.getElementById('flagBtn').innerHTML = flagged.has(q.id) ? '🚩 Flagged' : '🚩 Flag for review';
+
+  const container = document.getElementById('qOptions');
+  container.innerHTML = '';
+  const selected = answers[q.id];
+  q.shuffledOptions.forEach((opt, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'option' + (selected===opt.id ? ' selected' : '');
+    const letter = String.fromCharCode(65+idx); // display label A/B/C/D based on shuffled position
+    div.innerHTML = `<div class="radio"></div><div class="opt-text"><span class="opt-label">${letter}.</span>${opt.text}</div>`;
+    div.onclick = ()=>selectAnswer(q.id, opt.id);
+    container.appendChild(div);
+  });
+
+  updateHeaderStats();
+  renderNavGrid();
+
+  const isLast = currentIndex === shuffledQuestions.length - 1;
+  const isFirst = currentIndex === 0;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : '';
+  document.getElementById('btnPrev').style.visibility = isFirst ? 'hidden' : 'visible';
+}
+
+function selectAnswer(qId, optId){
+  answers[qId] = optId;
+  renderQuestion();
+}
+
+function toggleFlag(){
+  const q = shuffledQuestions[currentIndex];
+  if(flagged.has(q.id)) flagged.delete(q.id);
+  else flagged.add(q.id);
+  renderQuestion();
+}
+
+function prevQuestion(){
+  if(currentIndex>0){ currentIndex--; renderQuestion(); }
+}
+function nextQuestion(){
+  if(currentIndex<shuffledQuestions.length-1){ currentIndex++; renderQuestion(); }
+}
+
+/* =========================================================
+   HEADER / SIDEBAR STATS
+   ========================================================= */
+function updateHeaderStats(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  document.getElementById('hdrAnswered').textContent = `${answeredCount}/${total}`;
+  document.getElementById('hdrFlagged').textContent = flagged.size;
+  document.getElementById('sideAnswered').textContent = `${answeredCount} / ${total}`;
+  document.getElementById('sideUnanswered').textContent = total - answeredCount;
+  document.getElementById('sideFlagged').textContent = flagged.size;
+}
+
+function renderNavGrid(){
+  const grid = document.getElementById('qnavGrid');
+  grid.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const btn = document.createElement('button');
+    let cls = '';
+    if(idx===currentIndex) cls += ' current';
+    if(flagged.has(q.id)) cls += ' flagged';
+    else if(answers[q.id]) cls += ' answered';
+    btn.className = cls.trim();
+    btn.textContent = idx+1;
+    btn.onclick = ()=>{ currentIndex = idx; renderQuestion(); };
+    grid.appendChild(btn);
+  });
+}
+
+/* =========================================================
+   TAB SWITCH DETECTION
+   ========================================================= */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && !examSubmitted && document.getElementById('screen-exam').classList.contains('active')){
+    tabWarnings++;
+    if(tabWarnings>=3){
+      document.getElementById('tabWarnText').textContent = "You've received 3 tab-switch warnings. Your exam has been automatically submitted.";
+      document.getElementById('tabWarnModal').classList.add('active');
+      setTimeout(()=>{ finalSubmit(true); }, 1400);
+    } else {
+      document.getElementById('tabWarnText').textContent = `Switching tabs or minimizing the browser is not allowed during the exam. Warning ${tabWarnings} of 3 — after 3 warnings your exam will auto-submit.`;
+      document.getElementById('tabWarnModal').classList.add('active');
+    }
+  }
+});
+function closeTabWarn(){
+  document.getElementById('tabWarnModal').classList.remove('active');
+}
+
+/* =========================================================
+   SUBMIT FLOW
+   ========================================================= */
+function requestSubmit(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  const unanswered = total - answeredCount;
+  document.getElementById('submitModalText').textContent = unanswered>0
+    ? `You still have ${unanswered} unanswered question${unanswered>1?'s':''}. Once submitted, you cannot change your answers.`
+    : `All questions answered. Once submitted, you cannot change your answers.`;
+  document.getElementById('submitModal').classList.add('active');
+}
+function closeSubmitModal(){
+  document.getElementById('submitModal').classList.remove('active');
+}
+
+let lastResults = null;
+
+function finalSubmit(auto){
+  if(examSubmitted) return;
+  examSubmitted = true;
+  clearInterval(timerInterval);
+  document.getElementById('submitModal').classList.remove('active');
+  document.getElementById('tabWarnModal').classList.remove('active');
+  computeResults();
+  renderResults();
+  showScreen('screen-results');
+}
+
+/* =========================================================
+   SCORING
+   ========================================================= */
+function computeResults(){
+  const domainStats = {}; // domain -> {correct, total}
+  let correctCount = 0;
+  shuffledQuestions.forEach(q=>{
+    if(!domainStats[q.domain]) domainStats[q.domain] = {correct:0,total:0};
+    domainStats[q.domain].total++;
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    if(isCorrect){ correctCount++; domainStats[q.domain].correct++; }
+  });
+  const total = shuffledQuestions.length;
+  const pct = Math.round((correctCount/total)*100);
+  lastResults = { correctCount, total, pct, pass: pct>=70, domainStats };
+}
+
+/* =========================================================
+   RESULTS RENDER
+   ========================================================= */
+function renderResults(){
+  const r = lastResults;
+  document.getElementById('scorePct').textContent = r.pct + '%';
+  const ringColor = r.pass ? '#8DC63F' : '#E5484D';
+  document.getElementById('scoreRing').style.background =
+    `conic-gradient(${ringColor} ${r.pct*3.6}deg, #E8EAEE 0deg)`;
+
+  const passPill = document.getElementById('passPill');
+  passPill.textContent = r.pass ? '✓ PASS' : '✕ FAIL';
+  passPill.className = 'pass-pill ' + (r.pass ? 'pass' : 'fail');
+
+  document.getElementById('resultSub').textContent =
+    `You scored ${r.correctCount} out of ${r.total} questions correctly. Passing score is 70%.`;
+
+  const body = document.getElementById('domainBreakdownBody');
+  body.innerHTML = '';
+  Object.entries(r.domainStats).forEach(([domain, stat])=>{
+    const dpct = Math.round((stat.correct/stat.total)*100);
+    const barClass = dpct>=70 ? '' : (dpct>=40 ? 'mid' : 'low');
+    const row = document.createElement('div');
+    row.className = 'db-row';
+    row.innerHTML = `
+      <div class="db-top"><span>${domain}</span><span>${stat.correct}/${stat.total} (${dpct}%)</span></div>
+      <div class="db-bar-track"><div class="db-bar-fill ${barClass}" style="width:${dpct}%;"></div></div>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function retakeExam(){
+  startExam();
+}
+
+/* =========================================================
+   REVIEW MODE
+   ========================================================= */
+let reviewFilter = 'all';
+
+function openReview(){
+  reviewFilter = 'all';
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
+  renderReview();
+  showScreen('screen-review');
+}
+function backToResults(){
+  showScreen('screen-results');
+}
+function setReviewFilter(f){
+  reviewFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.filter-chip[data-filter="${f}"]`).classList.add('active');
+  renderReview();
+}
+
+function renderReview(){
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    const isSkipped = !userAns;
+    let status = isSkipped ? 'skipped' : (isCorrect ? 'correct' : 'incorrect');
+
+    if(reviewFilter!=='all' && reviewFilter!==status) return;
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    let optsHtml = '';
+    q.shuffledOptions.forEach((opt,i)=>{
+      const letter = String.fromCharCode(65+i);
+      let cls = '';
+      if(q.correct.includes(opt.id)) cls = 'correctAns';
+      else if(userAns===opt.id && !isCorrect) cls = 'wrongPicked';
+      let tag = '';
+      if(q.correct.includes(opt.id)) tag = ' ✓ Correct answer';
+      else if(userAns===opt.id) tag = ' ✕ Your answer';
+      optsHtml += `<div class="r-opt ${cls}"><span><b>${letter}.</b> ${opt.text}${tag ? '<br><small>'+tag+'</small>' : ''}</span></div>`;
+    });
+
+    card.innerHTML = `
+      <div class="rtop">
+        <span class="q-count">Question ${idx+1} · ${q.domain}</span>
+        <span class="status-chip ${status}">${status}</span>
+      </div>
+      <div class="rq">${q.question}</div>
+      ${optsHtml}
+      <div class="r-explain"><b>Explanation:</b> ${q.explanation}</div>
+    `;
+    list.appendChild(card);
+  });
+
+  if(list.innerHTML===''){
+    list.innerHTML = `<div class="review-card" style="text-align:center;color:var(--text-3);">No questions match this filter.</div>`;
+  }
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildShuffledQuestions();
+</script>
+</body>
+</html>
