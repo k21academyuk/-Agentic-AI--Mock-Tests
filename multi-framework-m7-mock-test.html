@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Multi-Framework Agent Development (Module 7) — K21 Academy Mock Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#F7F8FA; --surface:#FFFFFF; --border:#E8EAEE;
+    --text-1:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
+    --green:#8DC63F; --green-mid:#79B030; --green-bg:#F1F8E8; --green-dark:#4A7A1B;
+    --navy:#1A1248; --navy-mid:#2E2080; --blue:#1B9BD9;
+    --red:#E5484D; --red-bg:#FDECEC; --amber:#F5A623; --amber-bg:#FFF6E5;
+    --radius:16px; --radius-lg:24px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:block;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ---------- Top brand bar ---------- */
+  .topbar{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
+  .topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);}
+  .topbar .badge{background:rgba(141,198,63,.18);color:var(--green);border:1px solid rgba(141,198,63,.4);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+
+  /* ---------- Intro Screen ---------- */
+  #screen-intro .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .intro-hero{text-align:center;margin-bottom:32px;}
+  .intro-hero .eyebrow{display:inline-block;background:var(--green-bg);color:var(--green-dark);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:14px;}
+  .intro-hero h1{font-size:32px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .intro-hero p{color:var(--text-2);font-size:15px;max-width:640px;margin:0 auto;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0;}
+  .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 14px;text-align:center;}
+  .stat-card .label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:6px;}
+  .stat-card .value{font-size:20px;font-weight:800;color:var(--navy);}
+
+  .domain-table{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:28px;}
+  .domain-table h3{padding:18px 22px 0;font-size:16px;font-weight:800;color:var(--navy);}
+  .domain-table table{width:100%;border-collapse:collapse;margin-top:14px;}
+  .domain-table th{background:var(--green-bg);color:var(--green-dark);font-size:12px;text-transform:uppercase;letter-spacing:.03em;text-align:left;padding:10px 22px;}
+  .domain-table td{padding:12px 22px;font-size:14px;border-top:1px solid var(--border);color:var(--text-1);}
+  .domain-table td.weight{font-weight:700;color:var(--navy);text-align:right;}
+
+  .rules-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;}
+  .rules-card h3{color:var(--navy);font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .rules-card ul{list-style:none;}
+  .rules-card li{padding:9px 0 9px 26px;position:relative;font-size:14px;color:var(--text-2);border-top:1px solid var(--border);}
+  .rules-card li:first-child{border-top:none;}
+  .rules-card li::before{content:"⚠";position:absolute;left:0;color:var(--amber);font-size:13px;top:9px;}
+
+  .btn-primary{background:var(--green);color:#0f2a05;font-weight:700;font-size:16px;padding:16px 20px;border-radius:12px;width:100%;transition:.15s;box-shadow:0 4px 14px rgba(141,198,63,.35);}
+  .btn-primary:hover{background:var(--green-mid);transform:translateY(-1px);}
+  .btn-secondary{background:var(--surface);color:var(--navy);font-weight:700;font-size:14px;padding:12px 20px;border-radius:10px;border:1.5px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--navy);}
+  .btn-outline-red{background:#fff;color:var(--red);border:1.5px solid var(--red);font-weight:700;padding:10px 18px;border-radius:10px;}
+
+  /* ---------- Exam Screen ---------- */
+  #screen-exam .exam-header{background:var(--navy);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20;}
+  .exam-header .left{display:flex;align-items:center;gap:14px;font-size:13px;}
+  .exam-header .left .title{font-weight:700;font-size:14px;}
+  .exam-header .stats{display:flex;gap:18px;font-size:13px;color:#cfd0e6;}
+  .exam-header .stats b{color:#fff;}
+  .timer-pill{background:rgba(255,255,255,.1);padding:7px 16px;border-radius:999px;font-weight:800;font-size:15px;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+  .timer-pill.warn{background:rgba(245,166,35,.25);color:#ffd48a;}
+  .timer-pill.danger{background:rgba(229,72,77,.28);color:#ffb3b5;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+  .exam-layout{display:grid;grid-template-columns:1fr 300px;gap:0;max-width:1280px;margin:0 auto;align-items:start;}
+  .exam-main{padding:28px 32px 100px;}
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .q-count{font-size:13px;color:var(--text-3);font-weight:700;}
+  .domain-chip{background:var(--green-bg);color:var(--green-dark);font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;}
+  .flag-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .flag-btn.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+
+  .question-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px 26px 8px;margin-bottom:20px;}
+  .question-text{font-size:17px;font-weight:600;color:var(--text-1);margin-bottom:20px;line-height:1.55;}
+
+  .option{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:.12s;}
+  .option:hover{border-color:var(--green);background:var(--green-bg);}
+  .option.selected{border-color:var(--green);background:var(--green-bg);}
+  .option .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-3);flex-shrink:0;margin-top:1px;position:relative;}
+  .option.selected .radio{border-color:var(--green-mid);}
+  .option.selected .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--green-mid);}
+  .option .opt-text{font-size:14.5px;color:var(--text-1);}
+  .option .opt-label{font-weight:800;color:var(--navy-mid);margin-right:6px;}
+
+  .nav-buttons{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .nav-buttons button{padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;}
+  .btn-prev{background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .btn-next{background:var(--navy);color:#fff;}
+  .btn-submit-inline{background:var(--green);color:#0f2a05;}
+
+  /* ---------- Sidebar navigator ---------- */
+  .sidebar{padding:28px 24px;position:sticky;top:64px;}
+  .sidebar-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;}
+  .sidebar-card h4{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);font-weight:800;margin-bottom:12px;}
+  .progress-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);padding:6px 0;}
+  .progress-row b{color:var(--navy);}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text-2);margin-top:10px;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .qnav-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .qnav-grid button{aspect-ratio:1;border-radius:8px;font-size:12.5px;font-weight:700;background:#fff;border:1.5px solid var(--border);color:var(--text-2);}
+  .qnav-grid button.answered{background:var(--green-bg);border-color:var(--green);color:var(--green-dark);}
+  .qnav-grid button.flagged{background:var(--amber-bg);border-color:var(--amber);color:#8a5a00;}
+  .qnav-grid button.current{outline:2.5px solid var(--navy);outline-offset:1px;}
+  .submit-btn-side{width:100%;background:var(--navy);color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:14px;}
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:#fff;border-radius:var(--radius-lg);padding:30px;max-width:420px;width:100%;text-align:center;}
+  .modal-box .icon{font-size:38px;margin-bottom:10px;}
+  .modal-box h3{font-size:19px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .modal-box p{font-size:14px;color:var(--text-2);margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;font-size:14px;}
+
+  /* ---------- Results screen ---------- */
+  #screen-results .wrap{max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+  .result-hero{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:36px;text-align:center;margin-bottom:24px;}
+  .score-ring{width:170px;height:170px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;position:relative;}
+  .score-ring .inner{width:136px;height:136px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-ring .inner .pct{font-size:34px;font-weight:800;color:var(--navy);}
+  .score-ring .inner .lbl{font-size:11px;color:var(--text-3);text-transform:uppercase;font-weight:700;}
+  .pass-pill{display:inline-block;padding:8px 20px;border-radius:999px;font-weight:800;font-size:14px;margin-bottom:6px;}
+  .pass-pill.pass{background:var(--green-bg);color:var(--green-dark);}
+  .pass-pill.fail{background:var(--red-bg);color:#a11d21;}
+  .result-sub{color:var(--text-2);font-size:14px;}
+
+  .domain-breakdown{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px;margin-bottom:24px;}
+  .domain-breakdown h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:18px;}
+  .db-row{margin-bottom:16px;}
+  .db-row .db-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;color:var(--text-1);font-weight:600;}
+  .db-bar-track{height:10px;background:var(--bg);border-radius:999px;overflow:hidden;}
+  .db-bar-fill{height:100%;border-radius:999px;background:var(--green);}
+  .db-bar-fill.low{background:var(--red);}
+  .db-bar-fill.mid{background:var(--amber);}
+
+  .result-actions{display:flex;gap:14px;}
+  .result-actions button{flex:1;padding:15px;border-radius:12px;font-weight:700;font-size:14.5px;}
+
+  /* ---------- Review screen ---------- */
+  #screen-review .review-header{background:var(--navy);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;flex-wrap:wrap;gap:10px;}
+  .review-wrap{max-width:820px;margin:0 auto;padding:28px 20px 80px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .filter-chip{background:#fff;border:1.5px solid var(--border);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text-2);}
+  .filter-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .review-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;}
+  .review-card .rtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .status-chip{font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;text-transform:uppercase;}
+  .status-chip.correct{background:var(--green-bg);color:var(--green-dark);}
+  .status-chip.incorrect{background:var(--red-bg);color:#a11d21;}
+  .status-chip.skipped{background:#F3F4F6;color:var(--text-2);}
+  .review-card .rq{font-weight:600;font-size:15px;margin-bottom:14px;}
+  .r-opt{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:13.5px;display:flex;gap:8px;align-items:flex-start;}
+  .r-opt.correctAns{border-color:var(--green);background:var(--green-bg);}
+  .r-opt.wrongPicked{border-color:var(--red);background:var(--red-bg);}
+  .r-explain{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-2);margin-top:10px;border-left:3px solid var(--blue);}
+  .r-explain b{color:var(--navy);}
+
+  @media (max-width:900px){
+    .exam-layout{grid-template-columns:1fr;}
+    .sidebar{position:static;order:-1;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO SCREEN ================= -->
+<section id="screen-intro" class="screen active">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Agentic AI Course · Module 7</div>
+  </div>
+  <div class="wrap">
+    <div class="intro-hero">
+      <span class="eyebrow">🧠 Mock Test Simulator</span>
+      <h1>Multi-Framework Agent Development</h1>
+      <p>Module 7 — Practice in a realistic exam environment with a timer, question navigator, flagging, and instant feedback after submission.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Questions</div><div class="value">20</div></div>
+      <div class="stat-card"><div class="label">Time Limit</div><div class="value">20 Min</div></div>
+      <div class="stat-card"><div class="label">Passing Score</div><div class="value">70%</div></div>
+      <div class="stat-card"><div class="label">Question Type</div><div class="value">Single Select</div></div>
+    </div>
+
+    <div class="rules-card">
+      <h3>⚠ Exam Rules — Read Before Starting</h3>
+      <ul>
+        <li>Do NOT switch tabs or minimize the browser — your exam will be paused and a warning issued.</li>
+        <li>3 tab-switch warnings will automatically end and submit your exam.</li>
+        <li>Each question has exactly one correct answer. Partial credit is not given.</li>
+        <li>You can flag questions for review and return to them any time before submitting.</li>
+        <li>Once submitted, answers cannot be changed.</li>
+      </ul>
+    </div>
+
+    <button class="btn-primary" onclick="startExam()">▶ Start Exam Now</button>
+  </div>
+</section>
+
+<!-- ================= EXAM SCREEN ================= -->
+<section id="screen-exam" class="screen">
+  <div class="exam-header">
+    <div class="left">
+      <span class="title">K21 · Multi-Framework Agent Development (M7)</span>
+    </div>
+    <div class="stats">
+      <span>Answered <b id="hdrAnswered">0/20</b></span>
+      <span>Flagged <b id="hdrFlagged">0</b></span>
+    </div>
+    <div class="timer-pill" id="timerPill">⏱ 20:00</div>
+  </div>
+
+  <div class="exam-layout">
+    <div class="exam-main">
+      <div class="q-meta">
+        <span class="q-count">Question <b id="qNum">1</b> of 20</span>
+        <span class="domain-chip" id="qDomain">—</span>
+        <button class="flag-btn" id="flagBtn" onclick="toggleFlag()">🚩 Flag for review</button>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text" id="qText">Loading...</div>
+        <div id="qOptions"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-prev" id="btnPrev" onclick="prevQuestion()">← Prev</button>
+        <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+        <button class="btn-submit-inline" id="btnSubmitInline" onclick="requestSubmit()">Submit Exam →</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <h4>Progress</h4>
+        <div class="progress-row"><span>Answered</span><b id="sideAnswered">0 / 20</b></div>
+        <div class="progress-row"><span>Unanswered</span><b id="sideUnanswered">20</b></div>
+        <div class="progress-row"><span>Flagged</span><b id="sideFlagged">0</b></div>
+      </div>
+      <div class="sidebar-card">
+        <h4>Question Navigator</h4>
+        <div class="qnav-grid" id="qnavGrid"></div>
+        <div class="legend">
+          <span><i style="background:var(--navy);"></i>Current</span>
+          <span><i style="background:var(--green-bg);border:1px solid var(--green);"></i>Answered</span>
+          <span><i style="background:var(--amber-bg);border:1px solid var(--amber);"></i>Flagged</span>
+          <span><i style="background:#fff;border:1px solid var(--border);"></i>Unanswered</span>
+        </div>
+      </div>
+      <button class="submit-btn-side" onclick="requestSubmit()">Submit Exam →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS SCREEN ================= -->
+<section id="screen-results" class="screen">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> K21 Academy</div>
+    <div class="badge">Results</div>
+  </div>
+  <div class="wrap">
+    <div class="result-hero">
+      <div class="score-ring" id="scoreRing">
+        <div class="inner">
+          <div class="pct" id="scorePct">0%</div>
+          <div class="lbl">Score</div>
+        </div>
+      </div>
+      <div class="pass-pill" id="passPill">—</div>
+      <div class="result-sub" id="resultSub">You scored 0 out of 20 questions correctly.</div>
+    </div>
+
+    <div class="domain-breakdown">
+      <h3>📊 Domain-wise Breakdown</h3>
+      <div id="domainBreakdownBody"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-secondary" style="flex:1;" onclick="retakeExam()">↺ Retake Exam</button>
+      <button class="btn-primary" style="flex:1;box-shadow:none;" onclick="openReview()">🔍 Review All Questions</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVIEW SCREEN ================= -->
+<section id="screen-review" class="screen">
+  <div class="review-header">
+    <div class="brand"><span class="dot"></span> Review Mode — Multi-Framework Agent Development M7</div>
+    <button class="btn-secondary" onclick="backToResults()">← Back to Results</button>
+  </div>
+  <div class="review-wrap">
+    <div class="filter-row">
+      <button class="filter-chip active" data-filter="all" onclick="setReviewFilter('all')">All (20)</button>
+      <button class="filter-chip" data-filter="correct" onclick="setReviewFilter('correct')">Correct</button>
+      <button class="filter-chip" data-filter="incorrect" onclick="setReviewFilter('incorrect')">Incorrect</button>
+      <button class="filter-chip" data-filter="skipped" onclick="setReviewFilter('skipped')">Skipped</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+</section>
+
+<!-- ================= MODALS ================= -->
+<div class="modal-overlay" id="tabWarnModal">
+  <div class="modal-box">
+    <div class="icon">🚨</div>
+    <h3>You Left the Exam!</h3>
+    <p id="tabWarnText">Switching tabs or minimizing the browser is not allowed during the exam.</p>
+    <div class="modal-actions">
+      <button class="btn-primary" style="box-shadow:none;" onclick="closeTabWarn()">Return to Exam</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="submitModal">
+  <div class="modal-box">
+    <div class="icon">📤</div>
+    <h3>Submit Exam?</h3>
+    <p id="submitModalText">You still have unanswered questions. Once submitted, you cannot change your answers.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSubmitModal()">Cancel</button>
+      <button class="btn-primary" style="box-shadow:none;background:var(--red);color:#fff;" onclick="finalSubmit()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK — Multi-Framework Agent Development (Module 7)
+   ========================================================= */
+const QUESTIONS = [
+{ id:"q001", domain:"LlamaIndex for Agent Development", type:"single", correct_count:1,
+  question:"What is the recommended way to compose complex, multi-step LLM applications in LlamaIndex today, as opposed to the older monolithic query-engine assembly pattern?",
+  options:[
+    {id:"a",text:"Manually chaining Python if/else statements with no framework support"},
+    {id:"b",text:"Workflows — an event-driven, step-based abstraction where steps are triggered by events and emit new events"},
+    {id:"c",text:"A single unstructured prompt string with no steps at all"},
+    {id:"d",text:"Directly calling the LLM API with no orchestration layer whatsoever"}
+  ], correct:["b"],
+  explanation:"LlamaIndex's Workflows API is the current recommended way to compose multi-step LLM applications: steps are triggered by events and themselves emit further events, replacing the older monolithic query-engine assembly approach." },
+
+{ id:"q002", domain:"LlamaIndex for Agent Development", type:"single", correct_count:1,
+  question:"In a LlamaIndex Workflow, how are individual processing steps typically defined and connected?",
+  options:[
+    {id:"a",text:"Steps are hardcoded shell scripts with no Python involvement"},
+    {id:"b",text:"Steps can only run in a single fixed order with no branching or looping ever possible"},
+    {id:"c",text:"Steps must be manually invoked one at a time by a human operator"},
+    {id:"d",text:"Steps are defined as functions decorated with @step, which are triggered by specific Event types and themselves emit new Events to trigger subsequent steps"}
+  ], correct:["d"],
+  explanation:"LlamaIndex Workflow steps are Python functions decorated with @step; each step is triggered by a specific Event type and emits new Events, chaining steps together in an event-driven fashion." },
+
+{ id:"q003", domain:"LlamaIndex for Agent Development", type:"single", correct_count:1,
+  question:"Which LlamaIndex construct is specifically designed to orchestrate multiple agents, allowing one agent to hand off a task to another agent?",
+  options:[
+    {id:"a",text:"AgentWorkflow, which orchestrates multiple agents and supports task handoffs between them"},
+    {id:"b",text:"LlamaHub, a data loader registry"},
+    {id:"c",text:"A vector index with no agent logic"},
+    {id:"d",text:"A static YAML configuration file with no runtime logic"}
+  ], correct:["a"],
+  explanation:"AgentWorkflow is the LlamaIndex construct built specifically to orchestrate a system of one or more agents that can collaborate and hand off tasks to one another." },
+
+{ id:"q004", domain:"LlamaIndex for Agent Development", type:"single", correct_count:1,
+  question:"What execution style do LlamaIndex Workflows follow, which is described as well suited to I/O-heavy operations like calling LLMs and external APIs?",
+  options:[
+    {id:"a",text:"A strictly synchronous, blocking execution model with one operation at a time"},
+    {id:"b",text:"A batch-only model that requires all inputs to be collected before any processing begins"},
+    {id:"c",text:"An async-first, event-driven architecture that allows steps to run concurrently where appropriate"},
+    {id:"d",text:"A model that disables all concurrency to guarantee ordering"}
+  ], correct:["c"],
+  explanation:"LlamaIndex Workflows use an async-first, event-driven architecture, which suits I/O-heavy operations like LLM and API calls by allowing appropriate steps to run concurrently rather than blocking sequentially." },
+
+{ id:"q005", domain:"LlamaIndex for Agent Development", type:"single", correct_count:1,
+  question:"A team wants to build a document-heavy application that ingests PDFs, indexes them, and answers questions using retrieval, with the option to later expand into a multi-agent research assistant. Which framework's core strengths are most directly aligned with this use case?",
+  options:[
+    {id:"a",text:"A framework with no retrieval or indexing capabilities at all"},
+    {id:"b",text:"A framework that only supports single-turn, non-agentic text generation"},
+    {id:"c",text:"A framework that cannot ingest PDF documents under any circumstances"},
+    {id:"d",text:"LlamaIndex, given its strong data-connector ecosystem (e.g., LlamaHub) and Workflows-based orchestration purpose-built for retrieval-heavy, document-centric applications"}
+  ], correct:["d"],
+  explanation:"LlamaIndex's data-connector ecosystem and Workflows-based orchestration are purpose-built for retrieval-heavy, document-centric applications, with a clear path to extending into multi-agent systems via AgentWorkflow." },
+
+{ id:"q006", domain:"Haystack 2.x Pipeline Architecture", type:"single", correct_count:1,
+  question:"In Haystack 2.x, what is a 'component'?",
+  options:[
+    {id:"a",text:"A rebranded term with no functional meaning, purely cosmetic"},
+    {id:"b",text:"A building block with typed input and output sockets — such as a retriever, ranker, or generator — that can be connected to other components in a pipeline"},
+    {id:"c",text:"A configuration file that cannot be reused across pipelines"},
+    {id:"d",text:"A component that can only ever be used once and then discarded"}
+  ], correct:["b"],
+  explanation:"A Haystack 2.x component is a building block (retriever, ranker, generator, etc.) with typed input and output sockets that can be wired together with other components in a pipeline graph." },
+
+{ id:"q007", domain:"Haystack 2.x Pipeline Architecture", type:"single", correct_count:1,
+  question:"How is a Haystack 2.x pipeline typically constructed?",
+  options:[
+    {id:"a",text:"Components are added to the pipeline in a fixed, unchangeable order set at installation time"},
+    {id:"b",text:"Pipelines cannot be built programmatically; they must be hand-written as raw JSON with no validation"},
+    {id:"c",text:"Components are added to the pipeline via add_component, and then explicitly wired together via connect calls that define the pipeline graph"},
+    {id:"d",text:"A single monolithic function replaces the need for any components"}
+  ], correct:["c"],
+  explanation:"Building a Haystack 2.x pipeline is a two-step process: components are added via add_component, then explicitly connected using connect calls that define the resulting pipeline graph." },
+
+{ id:"q008", domain:"Haystack 2.x Pipeline Architecture", type:"single", correct_count:1,
+  question:"What structural capability did Haystack 2.x introduce to its pipeline graphs that was more limited or absent in the prior architecture?",
+  options:[
+    {id:"a",text:"Support for loops and more flexible routing, including sending a component's output to multiple recipients"},
+    {id:"b",text:"The removal of all branching logic entirely"},
+    {id:"c",text:"A restriction that pipelines may only ever contain exactly one component"},
+    {id:"d",text:"The elimination of any graph-like structure in favor of a flat list"}
+  ], correct:["a"],
+  explanation:"Haystack 2.x pipelines gained support for loops and more flexible routing — including sending a single component's output to multiple recipients — going beyond the more restricted structure of earlier versions." },
+
+{ id:"q009", domain:"Haystack 2.x Pipeline Architecture", type:"single", correct_count:1,
+  question:"Why does Haystack validate the connections between components (e.g., matching a string output to a string input) at build time?",
+  options:[
+    {id:"a",text:"To deliberately slow down pipeline construction for no functional benefit"},
+    {id:"b",text:"Because typed input/output sockets let Haystack catch mismatched or incompatible connections early, before the pipeline is run, rather than failing unpredictably at runtime"},
+    {id:"c",text:"Because Haystack does not support typed data at all"},
+    {id:"d",text:"Because validation is only cosmetic and has no effect on pipeline behavior"}
+  ], correct:["b"],
+  explanation:"Typed input/output sockets allow Haystack to validate that connections between components are compatible at build time, catching mismatches early rather than causing unpredictable runtime failures." },
+
+{ id:"q010", domain:"Haystack 2.x Pipeline Architecture", type:"single", correct_count:1,
+  question:"Compared to a framework that lets an LLM autonomously decide its own next action, how does Haystack's pipeline-based philosophy generally differ?",
+  options:[
+    {id:"a",text:"Haystack pipelines are also fully autonomous and make identical decisions to an agent-based framework"},
+    {id:"b",text:"Haystack has no concept of data flow whatsoever"},
+    {id:"c",text:"Haystack prioritizes explicit, developer-defined data flow through a predictable pipeline graph, favoring predictability and debuggability over full autonomous decision-making"},
+    {id:"d",text:"Haystack requires a human to manually execute every component by hand"}
+  ], correct:["c"],
+  explanation:"Haystack's philosophy favors explicit, developer-defined pipeline graphs, prioritizing predictability and debuggability — you know what will happen at each step — over ceding decision-making autonomy to the LLM." },
+
+{ id:"q011", domain:"DSPy — Programmatic Prompt Optimization", type:"single", correct_count:1,
+  question:"What is a DSPy 'Signature' primarily used for?",
+  options:[
+    {id:"a",text:"Cryptographically signing API requests sent to an LLM provider"},
+    {id:"b",text:"A visual diagram of the pipeline with no functional role"},
+    {id:"c",text:"A fixed, unchangeable prompt string with no structure at all"},
+    {id:"d",text:"A declarative specification of a module's input and output fields — describing what a task should accomplish rather than manually writing out a detailed prompt"}
+  ], correct:["d"],
+  explanation:"A DSPy Signature declaratively specifies a module's input and output fields — what the task should accomplish — rather than requiring the developer to hand-write a detailed prompt string." },
+
+{ id:"q012", domain:"DSPy — Programmatic Prompt Optimization", type:"single", correct_count:1,
+  question:"How does a DSPy 'Module' (such as Predict or ChainOfThought) relate to a Signature?",
+  options:[
+    {id:"a",text:"A Module takes a Signature and encapsulates a specific prompting strategy (such as direct prediction or step-by-step reasoning) for fulfilling that signature's input/output specification"},
+    {id:"b",text:"Modules have no relationship to Signatures whatsoever"},
+    {id:"c",text:"Modules replace the need for any LLM calls entirely"},
+    {id:"d",text:"A Signature can only be used by exactly one hardcoded Module across the entire framework"}
+  ], correct:["a"],
+  explanation:"A DSPy Module wraps a Signature with a specific prompting strategy — Predict for direct prediction, ChainOfThought for step-by-step reasoning, and so on — while fulfilling the same input/output specification." },
+
+{ id:"q013", domain:"DSPy — Programmatic Prompt Optimization", type:"single", correct_count:1,
+  question:"What is the primary role of a DSPy 'Optimizer' (also called a teleprompter, such as MIPROv2)?",
+  options:[
+    {id:"a",text:"It manually rewrites the developer's code with no connection to LLM behavior"},
+    {id:"b",text:"It deletes all existing prompts with no replacement"},
+    {id:"c",text:"It automatically searches for and selects effective instructions and few-shot examples for the program's prompts, compiling them to maximize a defined evaluation metric on training data"},
+    {id:"d",text:"It only functions when no training data is available at all"}
+  ], correct:["c"],
+  explanation:"A DSPy Optimizer (teleprompter) automatically searches for effective instructions and few-shot examples, compiling the program's prompts to maximize a defined metric evaluated against training data." },
+
+{ id:"q014", domain:"DSPy — Programmatic Prompt Optimization", type:"single", correct_count:1,
+  question:"How does DSPy's approach fundamentally differ from traditional manual prompt engineering?",
+  options:[
+    {id:"a",text:"DSPy prohibits the use of any language model entirely"},
+    {id:"b",text:"DSPy replaces hand-written, manually iterated prompt strings with declarative signatures and modules that are automatically compiled and optimized against a metric, rather than tuned by trial and error"},
+    {id:"c",text:"DSPy treats prompts as fixed, hand-tuned artifacts that must never be changed once written"},
+    {id:"d",text:"DSPy is identical to manual prompt engineering with no meaningful distinction"}
+  ], correct:["b"],
+  explanation:"DSPy shifts from manual prompt engineering (hand-written, trial-and-error prompt strings) to declarative signatures and modules that are automatically compiled and optimized against a defined metric." },
+
+{ id:"q015", domain:"DSPy — Programmatic Prompt Optimization", type:"single", correct_count:1,
+  question:"A team wants their LLM pipeline's prompts (instructions and few-shot examples) to be automatically tuned and improved based on a labeled training set and a defined success metric, rather than hand-edited through trial and error. Which framework's core capability is most directly designed for this need?",
+  options:[
+    {id:"a",text:"DSPy, whose signatures, modules, and optimizers are specifically built to programmatically compile and tune prompts against a metric using training data"},
+    {id:"b",text:"A framework with no concept of prompts, metrics, or training data whatsoever"},
+    {id:"c",text:"A framework that requires every prompt to be permanently hardcoded with no possibility of tuning"},
+    {id:"d",text:"A framework that can only operate without any evaluation metric at all"}
+  ], correct:["a"],
+  explanation:"DSPy's signatures, modules, and optimizers are specifically designed to programmatically compile and tune prompts against a defined metric using labeled training data — exactly this team's need." },
+
+{ id:"q016", domain:"Multi-Framework Selection & the 'Use Both' Pattern", type:"single", correct_count:1,
+  question:"A team needs complex, stateful multi-agent orchestration with explicit control-flow branching, loops, and human-in-the-loop checkpoints. Which framework, among those studied, is most directly purpose-built for this need?",
+  options:[
+    {id:"a",text:"A framework with no concept of state or control flow at all"},
+    {id:"b",text:"A framework that only supports a single linear sequence with no branching"},
+    {id:"c",text:"A framework designed exclusively for prompt optimization with no orchestration capability"},
+    {id:"d",text:"LangGraph, given its graph-based state management, conditional edges, cycles, and built-in interrupt/human-in-the-loop support"}
+  ], correct:["d"],
+  explanation:"LangGraph's graph-based state management, conditional edges, cyclic graphs, and built-in interrupt()/human-in-the-loop support make it the most directly purpose-built choice for complex, stateful multi-agent orchestration." },
+
+{ id:"q017", domain:"Multi-Framework Selection & the 'Use Both' Pattern", type:"single", correct_count:1,
+  question:"A team's primary challenge is that their hand-written prompts perform inconsistently across different underlying models, and they want the prompt wording itself to be automatically tuned. Rather than reaching for a general orchestration framework, which type of tool addresses this specific problem most directly?",
+  options:[
+    {id:"a",text:"A vector database with no relationship to prompt wording"},
+    {id:"b",text:"A tool that only manages tab-switch detection during exams"},
+    {id:"c",text:"A tool like DSPy, which automates prompt compilation and optimization rather than focusing on multi-step orchestration"},
+    {id:"d",text:"A tool that exclusively handles document parsing with no connection to prompts"}
+  ], correct:["c"],
+  explanation:"DSPy is specifically focused on automating prompt compilation and optimization, which directly addresses inconsistent prompt performance — unlike general orchestration frameworks, which focus on control flow rather than prompt wording." },
+
+{ id:"q018", domain:"Multi-Framework Selection & the 'Use Both' Pattern", type:"single", correct_count:1,
+  question:"What does the 'use both' pattern typically refer to when comparing frameworks like LangGraph, LlamaIndex, Haystack, and DSPy?",
+  options:[
+    {id:"a",text:"Selecting exactly one framework and permanently banning the use of any other framework in the same organization"},
+    {id:"b",text:"Combining complementary frameworks within a single system — for example, using DSPy to optimize the prompts inside individual steps of a LangGraph-orchestrated workflow, or using LlamaIndex for retrieval within a broader agent architecture — rather than treating the choice as strictly either-or"},
+    {id:"c",text:"Running two completely identical frameworks side by side with no integration between them"},
+    {id:"d",text:"A rule that forbids ever combining retrieval with orchestration in the same system"}
+  ], correct:["b"],
+  explanation:"The 'use both' pattern means combining complementary frameworks in one system — for example, DSPy optimizing prompts inside a LangGraph-orchestrated workflow, or LlamaIndex handling retrieval within a broader agent architecture — rather than picking a single framework to do everything." },
+
+{ id:"q019", domain:"Multi-Framework Selection & the 'Use Both' Pattern", type:"single", correct_count:1,
+  question:"When selecting between multiple LLM application frameworks for a new project, which approach best reflects sound framework-selection practice?",
+  options:[
+    {id:"a",text:"Always choosing the newest framework release regardless of the project's actual requirements"},
+    {id:"b",text:"Avoiding all frameworks and writing every component from scratch as a matter of principle"},
+    {id:"c",text:"Selecting a framework at random since all LLM frameworks are functionally interchangeable"},
+    {id:"d",text:"Matching each framework to the specific sub-problem it is strongest at — for example, orchestration and control flow, document-heavy retrieval, production pipeline predictability, or prompt optimization — rather than assuming one framework must handle every concern"}
+  ], correct:["d"],
+  explanation:"Sound framework selection matches each framework to the sub-problem it's strongest at — orchestration, document-heavy retrieval, pipeline predictability, or prompt optimization — rather than expecting a single framework to cover every concern equally well." },
+
+{ id:"q020", domain:"Multi-Framework Selection & the 'Use Both' Pattern", type:"single", correct_count:1,
+  question:"A production RAG system needs a highly predictable, explicitly-defined data flow with strong build-time validation between retrieval and generation steps, prioritizing debuggability over autonomous decision-making. Which framework's stated design philosophy most directly matches this requirement?",
+  options:[
+    {id:"a",text:"Haystack, whose component-based pipeline architecture with typed sockets and explicit connections favors predictability and debuggability"},
+    {id:"b",text:"A framework whose only feature is fully autonomous, unconstrained agent decision-making"},
+    {id:"c",text:"A framework with no retrieval capability whatsoever"},
+    {id:"d",text:"A framework that cannot be inspected or debugged under any circumstances"}
+  ], correct:["a"],
+  explanation:"Haystack's component-based pipeline architecture, with typed sockets and explicit build-time-validated connections, is specifically designed around predictability and debuggability rather than autonomous decision-making." }
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const TOTAL_TIME = 20 * 60; // seconds
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
+let currentIndex = 0;
+let answers = {};      // { questionId: optionId }
+let flagged = new Set();
+let tabWarnings = 0;
+let examSubmitted = false;
+let shuffledQuestions = []; // each item: {...question, shuffledOptions:[...]}
+
+/* ---------- Fisher-Yates shuffle ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildShuffledQuestions(){
+  shuffledQuestions = QUESTIONS.map(q => ({
+    ...q,
+    shuffledOptions: shuffle(q.options)
+  }));
+}
+
+/* =========================================================
+   SCREEN NAVIGATION
+   ========================================================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startExam(){
+  buildShuffledQuestions();
+  answers = {};
+  flagged = new Set();
+  tabWarnings = 0;
+  examSubmitted = false;
+  currentIndex = 0;
+  timeLeft = TOTAL_TIME;
+  renderNavGrid();
+  renderQuestion();
+  showScreen('screen-exam');
+  startTimer();
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      finalSubmit(true);
+    }
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s = (timeLeft%60).toString().padStart(2,'0');
+  const pill = document.getElementById('timerPill');
+  pill.textContent = `⏱ ${m}:${s}`;
+  pill.classList.remove('warn','danger');
+  if(timeLeft<=60) pill.classList.add('danger');
+  else if(timeLeft<=300) pill.classList.add('warn');
+}
+
+/* =========================================================
+   RENDER QUESTION
+   ========================================================= */
+function renderQuestion(){
+  const q = shuffledQuestions[currentIndex];
+  document.getElementById('qNum').textContent = currentIndex+1;
+  document.getElementById('qDomain').textContent = q.domain;
+  document.getElementById('qText').textContent = q.question;
+  document.getElementById('flagBtn').classList.toggle('flagged', flagged.has(q.id));
+  document.getElementById('flagBtn').innerHTML = flagged.has(q.id) ? '🚩 Flagged' : '🚩 Flag for review';
+
+  const container = document.getElementById('qOptions');
+  container.innerHTML = '';
+  const selected = answers[q.id];
+  q.shuffledOptions.forEach((opt, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'option' + (selected===opt.id ? ' selected' : '');
+    const letter = String.fromCharCode(65+idx); // display label A/B/C/D based on shuffled position
+    div.innerHTML = `<div class="radio"></div><div class="opt-text"><span class="opt-label">${letter}.</span>${opt.text}</div>`;
+    div.onclick = ()=>selectAnswer(q.id, opt.id);
+    container.appendChild(div);
+  });
+
+  updateHeaderStats();
+  renderNavGrid();
+
+  const isLast = currentIndex === shuffledQuestions.length - 1;
+  const isFirst = currentIndex === 0;
+  document.getElementById('btnNext').style.display = isLast ? 'none' : '';
+  document.getElementById('btnPrev').style.visibility = isFirst ? 'hidden' : 'visible';
+}
+
+function selectAnswer(qId, optId){
+  answers[qId] = optId;
+  renderQuestion();
+}
+
+function toggleFlag(){
+  const q = shuffledQuestions[currentIndex];
+  if(flagged.has(q.id)) flagged.delete(q.id);
+  else flagged.add(q.id);
+  renderQuestion();
+}
+
+function prevQuestion(){
+  if(currentIndex>0){ currentIndex--; renderQuestion(); }
+}
+function nextQuestion(){
+  if(currentIndex<shuffledQuestions.length-1){ currentIndex++; renderQuestion(); }
+}
+
+/* =========================================================
+   HEADER / SIDEBAR STATS
+   ========================================================= */
+function updateHeaderStats(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  document.getElementById('hdrAnswered').textContent = `${answeredCount}/${total}`;
+  document.getElementById('hdrFlagged').textContent = flagged.size;
+  document.getElementById('sideAnswered').textContent = `${answeredCount} / ${total}`;
+  document.getElementById('sideUnanswered').textContent = total - answeredCount;
+  document.getElementById('sideFlagged').textContent = flagged.size;
+}
+
+function renderNavGrid(){
+  const grid = document.getElementById('qnavGrid');
+  grid.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const btn = document.createElement('button');
+    let cls = '';
+    if(idx===currentIndex) cls += ' current';
+    if(flagged.has(q.id)) cls += ' flagged';
+    else if(answers[q.id]) cls += ' answered';
+    btn.className = cls.trim();
+    btn.textContent = idx+1;
+    btn.onclick = ()=>{ currentIndex = idx; renderQuestion(); };
+    grid.appendChild(btn);
+  });
+}
+
+/* =========================================================
+   TAB SWITCH DETECTION
+   ========================================================= */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && !examSubmitted && document.getElementById('screen-exam').classList.contains('active')){
+    tabWarnings++;
+    if(tabWarnings>=3){
+      document.getElementById('tabWarnText').textContent = "You've received 3 tab-switch warnings. Your exam has been automatically submitted.";
+      document.getElementById('tabWarnModal').classList.add('active');
+      setTimeout(()=>{ finalSubmit(true); }, 1400);
+    } else {
+      document.getElementById('tabWarnText').textContent = `Switching tabs or minimizing the browser is not allowed during the exam. Warning ${tabWarnings} of 3 — after 3 warnings your exam will auto-submit.`;
+      document.getElementById('tabWarnModal').classList.add('active');
+    }
+  }
+});
+function closeTabWarn(){
+  document.getElementById('tabWarnModal').classList.remove('active');
+}
+
+/* =========================================================
+   SUBMIT FLOW
+   ========================================================= */
+function requestSubmit(){
+  const answeredCount = Object.keys(answers).length;
+  const total = shuffledQuestions.length;
+  const unanswered = total - answeredCount;
+  document.getElementById('submitModalText').textContent = unanswered>0
+    ? `You still have ${unanswered} unanswered question${unanswered>1?'s':''}. Once submitted, you cannot change your answers.`
+    : `All questions answered. Once submitted, you cannot change your answers.`;
+  document.getElementById('submitModal').classList.add('active');
+}
+function closeSubmitModal(){
+  document.getElementById('submitModal').classList.remove('active');
+}
+
+let lastResults = null;
+
+function finalSubmit(auto){
+  if(examSubmitted) return;
+  examSubmitted = true;
+  clearInterval(timerInterval);
+  document.getElementById('submitModal').classList.remove('active');
+  document.getElementById('tabWarnModal').classList.remove('active');
+  computeResults();
+  renderResults();
+  showScreen('screen-results');
+}
+
+/* =========================================================
+   SCORING
+   ========================================================= */
+function computeResults(){
+  const domainStats = {}; // domain -> {correct, total}
+  let correctCount = 0;
+  shuffledQuestions.forEach(q=>{
+    if(!domainStats[q.domain]) domainStats[q.domain] = {correct:0,total:0};
+    domainStats[q.domain].total++;
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    if(isCorrect){ correctCount++; domainStats[q.domain].correct++; }
+  });
+  const total = shuffledQuestions.length;
+  const pct = Math.round((correctCount/total)*100);
+  lastResults = { correctCount, total, pct, pass: pct>=70, domainStats };
+}
+
+/* =========================================================
+   RESULTS RENDER
+   ========================================================= */
+function renderResults(){
+  const r = lastResults;
+  document.getElementById('scorePct').textContent = r.pct + '%';
+  const ringColor = r.pass ? '#8DC63F' : '#E5484D';
+  document.getElementById('scoreRing').style.background =
+    `conic-gradient(${ringColor} ${r.pct*3.6}deg, #E8EAEE 0deg)`;
+
+  const passPill = document.getElementById('passPill');
+  passPill.textContent = r.pass ? '✓ PASS' : '✕ FAIL';
+  passPill.className = 'pass-pill ' + (r.pass ? 'pass' : 'fail');
+
+  document.getElementById('resultSub').textContent =
+    `You scored ${r.correctCount} out of ${r.total} questions correctly. Passing score is 70%.`;
+
+  const body = document.getElementById('domainBreakdownBody');
+  body.innerHTML = '';
+  Object.entries(r.domainStats).forEach(([domain, stat])=>{
+    const dpct = Math.round((stat.correct/stat.total)*100);
+    const barClass = dpct>=70 ? '' : (dpct>=40 ? 'mid' : 'low');
+    const row = document.createElement('div');
+    row.className = 'db-row';
+    row.innerHTML = `
+      <div class="db-top"><span>${domain}</span><span>${stat.correct}/${stat.total} (${dpct}%)</span></div>
+      <div class="db-bar-track"><div class="db-bar-fill ${barClass}" style="width:${dpct}%;"></div></div>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function retakeExam(){
+  startExam();
+}
+
+/* =========================================================
+   REVIEW MODE
+   ========================================================= */
+let reviewFilter = 'all';
+
+function openReview(){
+  reviewFilter = 'all';
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
+  renderReview();
+  showScreen('screen-review');
+}
+function backToResults(){
+  showScreen('screen-results');
+}
+function setReviewFilter(f){
+  reviewFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.filter-chip[data-filter="${f}"]`).classList.add('active');
+  renderReview();
+}
+
+function renderReview(){
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  shuffledQuestions.forEach((q, idx)=>{
+    const userAns = answers[q.id];
+    const isCorrect = userAns && q.correct.includes(userAns);
+    const isSkipped = !userAns;
+    let status = isSkipped ? 'skipped' : (isCorrect ? 'correct' : 'incorrect');
+
+    if(reviewFilter!=='all' && reviewFilter!==status) return;
+
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    let optsHtml = '';
+    q.shuffledOptions.forEach((opt,i)=>{
+      const letter = String.fromCharCode(65+i);
+      let cls = '';
+      if(q.correct.includes(opt.id)) cls = 'correctAns';
+      else if(userAns===opt.id && !isCorrect) cls = 'wrongPicked';
+      let tag = '';
+      if(q.correct.includes(opt.id)) tag = ' ✓ Correct answer';
+      else if(userAns===opt.id) tag = ' ✕ Your answer';
+      optsHtml += `<div class="r-opt ${cls}"><span><b>${letter}.</b> ${opt.text}${tag ? '<br><small>'+tag+'</small>' : ''}</span></div>`;
+    });
+
+    card.innerHTML = `
+      <div class="rtop">
+        <span class="q-count">Question ${idx+1} · ${q.domain}</span>
+        <span class="status-chip ${status}">${status}</span>
+      </div>
+      <div class="rq">${q.question}</div>
+      ${optsHtml}
+      <div class="r-explain"><b>Explanation:</b> ${q.explanation}</div>
+    `;
+    list.appendChild(card);
+  });
+
+  if(list.innerHTML===''){
+    list.innerHTML = `<div class="review-card" style="text-align:center;color:var(--text-3);">No questions match this filter.</div>`;
+  }
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildShuffledQuestions();
+</script>
+</body>
+</html>
